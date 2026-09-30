@@ -25,13 +25,31 @@ FULLSCREEN_OVERRIDE_CSS = """
 }
 
 [data-testid="stToolbar"] {
+    display: flex !important;
+    background: transparent !important;
+    visibility: visible !important;
+    height: auto !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    top: 15px !important;
+    left: 15px !important;
+    z-index: 9999999 !important;
+}
+
+[data-testid="stToolbarActions"],
+[data-testid="stStatusWidget"],
+[data-testid="stToolbarActionButton"],
+[data-testid="stToolbar"] [data-testid="stActionButton"],
+.stDeployButton {
     display: none !important;
+    visibility: hidden !important;
 }
 
 [data-testid="stHeader"] {
     background: transparent !important;
     color: #ffffff !important;
     z-index: 101 !important;
+    pointer-events: none !important;
 }
 
 [data-testid="stSidebar"] {
@@ -103,65 +121,94 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-section[data-testid="collapsedControl"] { 
-    display: block !important; 
-    position: fixed !important; 
-    top: 15px !important; 
-    left: 15px !important; 
-    z-index: 999999 !important; 
-    pointer-events: auto !important; 
-    visibility: visible !important; 
-    opacity: 1 !important; 
-    background: rgba(10, 15, 30, 0.7) !important; 
-    border-radius: 8px !important; 
-}
-section[data-testid="collapsedControl"] * { 
-    color: #00f0ff !important; 
-    font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
-    font-size: 24px !important; 
-}
-
-[data-testid="collapsedControl"] { 
-    display: block !important; 
-    position: fixed !important; 
-    top: 15px !important; 
-    left: 15px !important; 
-    z-index: 999999 !important; 
-    pointer-events: auto !important; 
-    visibility: visible !important; 
-    opacity: 1 !important; 
-    background: rgba(10, 15, 30, 0.7) !important; 
-    border-radius: 8px !important; 
-}
-
-[data-testid="collapsedControl"] *, [data-testid="stSidebarCollapseButton"] * { 
-    font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
-    color: #00f0ff !important; 
-    font-size: 24px !important; 
-}
-
+[data-testid="stExpandSidebarButton"],
 [data-testid="collapsedControl"],
-[data-testid="stSidebarCollapseButton"],
+section[data-testid="collapsedControl"],
 [data-testid="stSidebarTrigger"] {
-    color: #00f0ff !important;
-    background: transparent !important;
+    display: flex !important;
+    position: fixed !important;
+    top: 15px !important;
+    left: 15px !important;
+    z-index: 99999999 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(10, 15, 30, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(0, 240, 255, 0.5) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 8px rgba(0, 240, 255, 0.2) !important;
+    width: 42px !important;
+    height: 42px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
 }
 
-[data-testid="collapsedControl"] button,
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="stSidebarTrigger"] button {
-    background: rgba(18, 22, 36, 0.7) !important;
-    border: 1px solid rgba(0, 240, 255, 0.3) !important;
-    color: #00f0ff !important;
-    border-radius: 50% !important;
-    transition: all 0.2s ease !important;
-}
-
-[data-testid="collapsedControl"] button:hover,
-[data-testid="stSidebarCollapseButton"] button:hover,
-[data-testid="stSidebarTrigger"] button:hover {
+[data-testid="stExpandSidebarButton"]:hover,
+[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarTrigger"]:hover {
     background: rgba(0, 240, 255, 0.25) !important;
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important;
+    border-color: #00f0ff !important;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.7) !important;
+    transform: scale(1.05) !important;
+}
+
+[data-testid="stExpandSidebarButton"] button,
+[data-testid="collapsedControl"] button,
+[data-testid="stSidebarTrigger"] button {
+    background: transparent !important;
+    border: none !important;
+    color: #00f0ff !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+}
+
+[data-testid="stSidebarCollapseButton"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: rgba(18, 22, 36, 0.7) !important;
+    border: 1px solid rgba(0, 240, 255, 0.4) !important;
+    border-radius: 50% !important;
+    color: #00f0ff !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    z-index: 100000 !important;
+}
+
+[data-testid="stSidebarCollapseButton"]:hover {
+    background: rgba(0, 240, 255, 0.25) !important;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.6) !important;
+}
+
+[data-testid="stExpandSidebarButton"] *, 
+[data-testid="collapsedControl"] *, 
+section[data-testid="collapsedControl"] *,
+[data-testid="stSidebarCollapseButton"] *,
+[data-testid="stSidebarTrigger"] * { 
+    font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
+    color: #00f0ff !important; 
+    font-size: 24px !important; 
+    font-weight: normal !important;
+    font-style: normal !important;
+    line-height: 1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    direction: ltr !important;
 }
 
 div[data-baseweb="popover"],
@@ -401,14 +448,21 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
     #brand-badge {
       position: absolute;
-      top: 28px;
-      left: 28px;
+      top: 18px;
+      left: 70px;
       z-index: 10;
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.6);
-      pointer-events: none;
+      cursor: pointer;
+      pointer-events: auto !important;
+      user-select: none;
+      transition: all 0.25s ease;
+    }
+    #brand-badge:hover strong {
+      color: #ffffff;
+      text-shadow: 0 0 10px #00f0ff;
     }
     #brand-badge strong {
       color: #00f0ff;
@@ -439,6 +493,32 @@ CINEMATIC_THREEJS_TEMPLATE = """
       background: rgba(30, 36, 52, 0.85);
       border-color: rgba(0, 240, 255, 0.5);
       color: #00f0ff;
+      transform: translateY(-2px);
+    }
+
+    #hud-sidebar-toggle {
+      position: absolute;
+      bottom: 28px;
+      left: 195px;
+      z-index: 10;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    #hud-sidebar-toggle:hover {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
       transform: translateY(-2px);
     }
 
@@ -493,6 +573,14 @@ CINEMATIC_THREEJS_TEMPLATE = """
         bottom: 16px !important;
         left: 16px !important;
         padding: 8px 14px !important;
+        font-size: 11px !important;
+        pointer-events: auto !important;
+      }
+
+      #hud-sidebar-toggle {
+        bottom: 16px !important;
+        left: 155px !important;
+        padding: 8px 12px !important;
         font-size: 11px !important;
         pointer-events: auto !important;
       }
@@ -768,7 +856,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
     <span id="autopilot-nav-badge" style="display: none; color: #00f0ff; font-weight: 700; font-size: 11px; letter-spacing: 1px; border: 1px solid rgba(0,240,255,0.6); padding: 2px 8px; border-radius: 9999px; background: rgba(0,240,255,0.15);">AUTO-PILOT QA</span>
   </div>
 
-  <div id="brand-badge">
+  <div id="brand-badge" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
     <strong>NEO SENTINEL</strong>
     DEEP SPACE TRAJECTORY VISUALIZER
   </div>
@@ -776,6 +864,11 @@ CINEMATIC_THREEJS_TEMPLATE = """
   <div id="reset-control" class="glass-pill" onclick="resetToEarthView()">
     <span>🌍</span>
     <span>RESET VIEW (ESC)</span>
+  </div>
+
+  <div id="hud-sidebar-toggle" class="glass-pill" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
+    <span>☰</span>
+    <span>CONTROLS</span>
   </div>
 
   <div id="nav-help">
@@ -1521,6 +1614,27 @@ CINEMATIC_THREEJS_TEMPLATE = """
           .to({ x: 0, y: 0, z: 0 }, 1500)
           .easing(TWEEN.Easing.Cubic.InOut)
           .start();
+      };
+
+      window.toggleMissionControls = function() {
+        try {
+          const pDoc = window.parent.document;
+          if (!pDoc) return;
+
+          const expandBtn = pDoc.querySelector('[data-testid="stExpandSidebarButton"] button, [data-testid="stExpandSidebarButton"], [data-testid="stSidebarTrigger"] button, [data-testid="stSidebarTrigger"], [data-testid="collapsedControl"] button, section[data-testid="collapsedControl"] button, button[aria-label="Expand sidebar"]');
+          if (expandBtn) {
+            expandBtn.click();
+            return;
+          }
+
+          const collapseBtn = pDoc.querySelector('[data-testid="stSidebarCollapseButton"] button, [data-testid="stSidebarCollapseButton"], button[aria-label="Collapse sidebar"]');
+          if (collapseBtn) {
+            collapseBtn.click();
+            return;
+          }
+        } catch (err) {
+          console.warn("Could not toggle mission controls sidebar:", err);
+        }
       };
 
       const drawerCloseBtn = document.getElementById('drawer-close-btn') || document.querySelector('.close-btn') || document.querySelector('.drawer-close');
