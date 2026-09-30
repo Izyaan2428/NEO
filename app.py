@@ -1051,16 +1051,32 @@ CINEMATIC_THREEJS_TEMPLATE = """
       controls.minDistance = 14;
       controls.maxDistance = 400;
 
-      // Solar directional light and deep vacuum ambient
+      // Solar setup: Solid core mesh with depthWrite: true + outer corona glow sprite
       const sunPosition = new THREE.Vector3(1200, 400, -1200);
-      const sunLight = new THREE.DirectionalLight(0xffffff, 4.0);
-      sunLight.position.copy(sunPosition);
+
+      // 1. Solid opaque core mesh with depthWrite: true to guarantee zero see-through bug
+      const sunCoreGeo = new THREE.SphereGeometry(140, 32, 32);
+      const sunCoreMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        depthWrite: true,
+        depthTest: true
+      });
+      const sunMesh = new THREE.Mesh(sunCoreGeo, sunCoreMat);
+      sunMesh.position.copy(sunPosition);
+      sunMesh.renderOrder = 0;
+      scene.add(sunMesh);
+
+      // 2. Primary solar directional light anchored at the exact Sun world position
+      const sunLight = new THREE.DirectionalLight(0xffffff, 4.2);
+      sunLight.position.copy(sunMesh.position);
+      sunLight.target.position.set(0, 0, 0);
       scene.add(sunLight);
+      scene.add(sunLight.target);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.015);
       scene.add(ambientLight);
 
-      // Solar sprite
+      // 3. Solar corona glow sprite with AdditiveBlending over solid core
       function createSunCanvasTexture() {
         const c = document.createElement('canvas');
         c.width = 512;
@@ -1069,8 +1085,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
         const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
         grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
-        grad.addColorStop(0.08, 'rgba(255, 252, 220, 0.98)');
-        grad.addColorStop(0.24, 'rgba(255, 195, 60, 0.8)');
+        grad.addColorStop(0.10, 'rgba(255, 250, 220, 0.98)');
+        grad.addColorStop(0.25, 'rgba(255, 195, 60, 0.8)');
         grad.addColorStop(0.50, 'rgba(255, 110, 20, 0.35)');
         grad.addColorStop(0.75, 'rgba(255, 45, 10, 0.12)');
         grad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
@@ -1089,11 +1105,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
         color: 0xffffff,
         transparent: true,
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
+        depthTest: true
       });
       const sunSprite = new THREE.Sprite(sunMaterial);
       sunSprite.position.copy(sunPosition);
-      sunSprite.scale.set(1500, 1500, 1);
+      sunSprite.scale.set(1600, 1600, 1);
+      sunSprite.renderOrder = 1;
       scene.add(sunSprite);
 
       // Skysphere and starfield
@@ -1164,8 +1182,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
       });
 
       // City lights night terminator shader
+      let earthShaderUniforms = null;
       try {
         earthMat.onBeforeCompile = (shader) => {
+          earthShaderUniforms = shader.uniforms;
           shader.uniforms.uSunDir = { value: sunPosition.clone().normalize() };
           shader.vertexShader = `varying vec3 vWorldNormal;\n` + shader.vertexShader;
           shader.vertexShader = shader.vertexShader.replace(
@@ -1867,6 +1887,23 @@ CINEMATIC_THREEJS_TEMPLATE = """
         const elapsed = clock.getElapsedTime();
 
         TWEEN.update();
+
+        // Anchor lighting to Sun position and recalculate light vector toward origin/planets
+        const currentSunPos = new THREE.Vector3();
+        sunMesh.getWorldPosition(currentSunPos);
+        sunLight.position.copy(currentSunPos);
+        sunLight.target.position.set(0, 0, 0);
+        sunLight.target.updateMatrixWorld();
+
+        sunSprite.position.copy(currentSunPos);
+
+        const currentSunDir = currentSunPos.clone().normalize();
+        if (earthShaderUniforms && earthShaderUniforms.uSunDir) {
+          earthShaderUniforms.uSunDir.value.copy(currentSunDir);
+        }
+        if (typeof atmosphereMat !== 'undefined' && atmosphereMat.uniforms && atmosphereMat.uniforms.uSunPos) {
+          atmosphereMat.uniforms.uSunPos.value.copy(currentSunPos);
+        }
 
         // Planetary rotation
         earthMesh.rotation.y += 0.0011;
