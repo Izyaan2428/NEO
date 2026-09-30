@@ -103,9 +103,35 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-[data-testid="collapsedControl"] { 
-    display: flex !important; 
+section[data-testid="collapsedControl"] { 
+    display: block !important; 
+    position: fixed !important; 
+    top: 15px !important; 
+    left: 15px !important; 
     z-index: 999999 !important; 
+    pointer-events: auto !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+    background: rgba(10, 15, 30, 0.7) !important; 
+    border-radius: 8px !important; 
+}
+section[data-testid="collapsedControl"] * { 
+    color: #00f0ff !important; 
+    font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
+    font-size: 24px !important; 
+}
+
+[data-testid="collapsedControl"] { 
+    display: block !important; 
+    position: fixed !important; 
+    top: 15px !important; 
+    left: 15px !important; 
+    z-index: 999999 !important; 
+    pointer-events: auto !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+    background: rgba(10, 15, 30, 0.7) !important; 
+    border-radius: 8px !important; 
 }
 
 [data-testid="collapsedControl"] *, [data-testid="stSidebarCollapseButton"] * { 
@@ -501,28 +527,31 @@ CINEMATIC_THREEJS_TEMPLATE = """
       overflow-y: auto;
       pointer-events: auto;
     }
+    #telemetry-drawer .close-btn, #telemetry-drawer button { pointer-events: auto !important; cursor: pointer !important; z-index: 1000000 !important; position: relative; }
     .drawer-close {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      cursor: pointer;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 16px;
-      transition: all 0.2s ease;
+      position: absolute !important;
+      top: 24px !important;
+      right: 24px !important;
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      border: 1px solid rgba(0, 240, 255, 0.4) !important;
+      cursor: pointer !important;
+      color: #ffffff !important;
+      font-size: 18px !important;
+      line-height: 1 !important;
+      transition: all 0.2s ease !important;
       pointer-events: auto !important;
+      z-index: 1000000 !important;
     }
-    .drawer-close:hover {
-      background: rgba(255, 0, 60, 0.3);
-      border-color: #ff003c;
-      color: #ffffff;
+    .drawer-close:hover, #telemetry-drawer .close-btn:hover {
+      background: rgba(255, 0, 60, 0.3) !important;
+      border-color: #ff003c !important;
+      color: #ffffff !important;
     }
     .target-tag {
       font-size: 10px;
@@ -766,7 +795,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
   </div>
 
   <div id="telemetry-drawer">
-    <div class="drawer-close" onclick="resetToEarthView()">×</div>
+    <button class="drawer-close close-btn" id="drawer-close-btn" onclick="resetToEarthView()" aria-label="Close drawer">×</button>
     <div class="target-tag">TARGET TELEMETRY</div>
     <div class="target-name" id="drawer-name">---</div>
     <div id="drawer-threat" class="threat-pill">---</div>
@@ -1474,7 +1503,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         stopAutoPilot();
         isTracking = false;
         selectedMesh = null;
-        drawer.style.right = window.innerWidth <= 768 ? '-100vw' : '-450px';
+        drawer.style.right = '-100vw';
 
         const reticle = document.getElementById('targeting-reticle');
         if (reticle) {
@@ -1493,6 +1522,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
           .easing(TWEEN.Easing.Cubic.InOut)
           .start();
       };
+
+      const drawerCloseBtn = document.getElementById('drawer-close-btn') || document.querySelector('.close-btn') || document.querySelector('.drawer-close');
+      if (drawerCloseBtn) {
+        const onDrawerClose = (ev) => {
+          if (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+          }
+          window.resetToEarthView();
+        };
+        drawerCloseBtn.addEventListener('click', onDrawerClose);
+        drawerCloseBtn.addEventListener('touchend', onDrawerClose);
+      }
 
       function renderSilhouette(diameterM, scaleAnalogy) {
         const silContainer = document.getElementById('drawer-silhouette');
@@ -1672,7 +1714,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
         if (!isTracking && drawer.style.right !== '0px') {
-          drawer.style.right = window.innerWidth <= 768 ? '-100vw' : '-450px';
+          drawer.style.right = '-100vw';
         }
       });
 
