@@ -103,11 +103,15 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-[data-testid="collapsedControl"] *, 
-[data-testid="stSidebarCollapseButton"] * { 
+[data-testid="collapsedControl"] { 
+    display: flex !important; 
+    z-index: 999999 !important; 
+}
+
+[data-testid="collapsedControl"] *, [data-testid="stSidebarCollapseButton"] * { 
     font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
-    font-size: 24px !important; 
     color: #00f0ff !important; 
+    font-size: 24px !important; 
 }
 
 [data-testid="collapsedControl"],
@@ -132,12 +136,6 @@ FULLSCREEN_OVERRIDE_CSS = """
 [data-testid="stSidebarTrigger"] button:hover {
     background: rgba(0, 240, 255, 0.25) !important;
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important;
-}
-
-@media (max-width: 768px) { 
-    [data-testid="collapsedControl"] { 
-        display: none !important; 
-    } 
 }
 
 div[data-baseweb="popover"],
