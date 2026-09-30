@@ -57,7 +57,7 @@ FULLSCREEN_OVERRIDE_CSS = """
 [data-testid="stSidebar"] h3, 
 [data-testid="stSidebar"] p, 
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span {
+[data-testid="stSidebar"] span:not(.material-symbols-rounded):not(.material-icons) {
     color: #ffffff !important;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif !important;
 }
@@ -109,13 +109,34 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-/* Sidebar collapse/expand trigger styling */
+/* 1. RESTORE MATERIAL ICON LIGATURES */
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="stSidebarTrigger"] span,
+.material-symbols-rounded,
+.material-icons {
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+}
+
+/* 2. CLEAN UP COLLAPSE BUTTON STYLING */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarTrigger"] {
+    color: #00f0ff !important;
+    background: transparent !important;
+}
+
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="stSidebarTrigger"] button {
     background: rgba(18, 22, 36, 0.7) !important;
     border: 1px solid rgba(0, 240, 255, 0.3) !important;
     color: #00f0ff !important;
     border-radius: 50% !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="stSidebarTrigger"] button:hover {
+    background: rgba(0, 240, 255, 0.25) !important;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important;
 }
 
 /* Calendar popover styling */
