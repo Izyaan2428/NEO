@@ -7,7 +7,6 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Full-screen wide layout with expanded sidebar for Temporal Controls
 st.set_page_config(
     page_title="NASA Eyes on Asteroids | NEO Sentinel",
     page_icon="☄️",
@@ -15,12 +14,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------------------------------------------------------
-# 1. FULL-SCREEN IMMERSION (Streamlit Chrome & Padding Override)
-# ---------------------------------------------------------
 FULLSCREEN_OVERRIDE_CSS = """
 <style>
-/* Total Streamlit UI chrome suppression */
 #MainMenu, footer {
     visibility: hidden !important;
     display: none !important;
@@ -30,14 +25,12 @@ FULLSCREEN_OVERRIDE_CSS = """
     display: none !important;
 }
 
-/* Header made transparent so collapse button remains accessible without white banner */
 [data-testid="stHeader"] {
     background: transparent !important;
     color: #ffffff !important;
     z-index: 101 !important;
 }
 
-/* Glassmorphic Sci-Fi Sidebar */
 [data-testid="stSidebar"] {
     background: rgba(10, 15, 30, 0.85) !important;
     backdrop-filter: blur(24px) !important;
@@ -51,7 +44,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     background: transparent !important;
 }
 
-/* Sidebar typography and controls */
 [data-testid="stSidebar"] h1, 
 [data-testid="stSidebar"] h2, 
 [data-testid="stSidebar"] h3, 
@@ -70,7 +62,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     font-weight: 600 !important;
 }
 
-/* Glassmorphic input styles for st.date_input */
 [data-testid="stSidebar"] input {
     background: rgba(18, 22, 36, 0.85) !important;
     color: #00f0ff !important;
@@ -86,7 +77,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.5) !important;
 }
 
-/* Glassmorphic button for Warp to Origin */
 [data-testid="stSidebar"] button {
     background: rgba(18, 22, 36, 0.7) !important;
     border: 1px solid rgba(0, 240, 255, 0.4) !important;
@@ -109,7 +99,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-/* 1. RESTORE MATERIAL ICON LIGATURES */
 [data-testid="stSidebarCollapseButton"] span,
 [data-testid="stSidebarTrigger"] span,
 .material-symbols-rounded,
@@ -117,7 +106,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     font-family: 'Material Symbols Rounded', 'Material Icons' !important;
 }
 
-/* 2. CLEAN UP COLLAPSE BUTTON STYLING */
 [data-testid="stSidebarCollapseButton"],
 [data-testid="stSidebarTrigger"] {
     color: #00f0ff !important;
@@ -139,7 +127,6 @@ FULLSCREEN_OVERRIDE_CSS = """
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important;
 }
 
-/* Calendar popover styling */
 div[data-baseweb="popover"],
 div[data-baseweb="calendar"] {
     z-index: 1000 !important;
@@ -152,7 +139,6 @@ div[data-baseweb="calendar"] {
     color: #ffffff !important;
 }
 
-/* Styling for st.toggle in sidebar */
 [data-testid="stSidebar"] [data-testid="stToggle"] {
     margin-top: 10px !important;
 }
@@ -164,7 +150,6 @@ div[data-baseweb="calendar"] {
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.7) !important;
 }
 
-/* Force zero padding and 100vw/100vh canvas filling */
 .main, .block-container, [data-testid="stAppViewContainer"] {
     padding: 0 !important;
     margin: 0 !important;
@@ -190,9 +175,6 @@ iframe {
 st.markdown(FULLSCREEN_OVERRIDE_CSS, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------
-# 2. BULLETPROOF DATA PIPELINE (GUARANTEED DATA)
-# ---------------------------------------------------------
 def get_scale_comparison(diameter_m: float) -> str:
     if diameter_m is None or pd.isna(diameter_m):
         return "Unknown scale"
@@ -221,10 +203,7 @@ def get_nasa_api_key() -> str:
 
 
 def create_guaranteed_mock_df() -> pd.DataFrame:
-    """
-    Forcefully creates guaranteed mock asteroids with full scale & orbital metrics.
-    Ensures it is mathematically impossible to pass 0 tracked asteroids.
-    """
+    """Fallback simulation dataset when external API is unreachable."""
     records = [
         {"Name": "SIM-ALPHA", "Diameter (m)": 250.0, "Velocity (km/h)": 45000.0, "Miss Distance (km)": 2500000.0, "Hazardous": True},
         {"Name": "SIM-BETA", "Diameter (m)": 120.0, "Velocity (km/h)": 28000.0, "Miss Distance (km)": 14000000.0, "Hazardous": False},
@@ -282,7 +261,7 @@ def fetch_asteroid_data(target_date: str) -> pd.DataFrame:
     except Exception:
         df = None
 
-    # Step 1 Requirement: Explicit check to guarantee fallback asteroids if df is None or empty
+    # Fallback dataset if API fails or returns no records
     if df is None or df.empty:
         df = pd.DataFrame([
             {"Name": "SIM-ALPHA", "Diameter (m)": 250, "Velocity (km/h)": 45000, "Miss Distance (km)": 2500000, "Hazardous": True},
@@ -294,9 +273,6 @@ def fetch_asteroid_data(target_date: str) -> pd.DataFrame:
     return df
 
 
-# ---------------------------------------------------------
-# 3. PRODUCTION-GRADE 3D THREE.JS WEBGL ENGINE TEMPLATE
-# ---------------------------------------------------------
 CINEMATIC_THREEJS_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -317,7 +293,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       -webkit-user-select: none;
     }
 
-    /* Container where WebGLRenderer is appended */
     #canvas-container {
       position: absolute;
       top: 0;
@@ -329,7 +304,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       background: #000000;
     }
 
-    /* ---------------- APPLE / SPACEX GLASSMORPHIC UI ---------------- */
     .glass-pill {
       background: rgba(18, 22, 32, 0.65);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -339,7 +313,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       border-radius: 9999px;
     }
 
-    /* Top Center Navigation Pill */
     #top-nav {
       position: absolute;
       top: 20px;
@@ -383,7 +356,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       font-variant-numeric: tabular-nums;
     }
 
-    /* Top Left Brand Tag */
     #brand-badge {
       position: absolute;
       top: 28px;
@@ -403,7 +375,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       margin-bottom: 2px;
     }
 
-    /* Bottom Left Controls & Reset */
     #reset-control {
       position: absolute;
       bottom: 28px;
@@ -427,7 +398,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       transform: translateY(-2px);
     }
 
-    /* Bottom Navigation Helper */
     #nav-help {
       position: absolute;
       bottom: 30px;
@@ -440,7 +410,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       pointer-events: none;
     }
 
-    /* Responsive adjustments for split-screen / narrow viewports */
     @media (max-width: 820px) {
       #brand-badge { display: none; }
       #nav-help { display: none; }
@@ -458,7 +427,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       }
     }
 
-    /* Right Telemetry Slide-out Panel (Glassmorphism & Split-Screen Responsive) */
     #telemetry-drawer {
       position: absolute;
       top: 0;
@@ -541,7 +509,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       box-shadow: 0 0 15px rgba(255, 0, 60, 0.35);
     }
     
-    /* Scale Silhouette Comparison */
     .scale-card {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -572,7 +539,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Metric Key-Value List */
     .telemetry-row {
       display: flex;
       justify-content: space-between;
@@ -592,7 +558,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       font-variant-numeric: tabular-nums;
     }
 
-    /* Hover Cursor Tooltip */
     #hover-tooltip {
       position: absolute;
       display: none;
@@ -610,7 +575,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       transform: translate(12px, -12px);
     }
 
-    /* ---------------- AEROSPACE HUD TARGETING RETICLE ---------------- */
     #targeting-reticle {
       position: absolute;
       top: -9999px;
@@ -705,16 +669,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
       to { transform: rotate(0deg); }
     }
   </style>
-  <!-- Three.js, OrbitControls, and TWEEN.js CDNs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 </head>
 <body>
-  <!-- Specific mounting container div above script tag -->
   <div id="canvas-container"></div>
 
-  <!-- Top Center Navigation Pill -->
   <div id="top-nav" class="glass-pill">
     <div class="status-beacon"></div>
     <span class="brand-title">NASA EYES ON ASTEROIDS</span>
@@ -725,27 +686,22 @@ CINEMATIC_THREEJS_TEMPLATE = """
     <span id="autopilot-nav-badge" style="display: none; color: #00f0ff; font-weight: 700; font-size: 11px; letter-spacing: 1px; border: 1px solid rgba(0,240,255,0.6); padding: 2px 8px; border-radius: 9999px; background: rgba(0,240,255,0.15);">AUTO-PILOT QA</span>
   </div>
 
-  <!-- Top Left Brand Badge -->
   <div id="brand-badge">
     <strong>NEO SENTINEL</strong>
     DEEP SPACE TRAJECTORY VISUALIZER
   </div>
 
-  <!-- Bottom Left Reset View Button -->
   <div id="reset-control" class="glass-pill" onclick="resetToEarthView()">
     <span>🌍</span>
     <span>RESET VIEW (ESC)</span>
   </div>
 
-  <!-- Bottom Navigation Helper -->
   <div id="nav-help">
     DRAG TO ORBIT // SCROLL TO ZOOM // CLICK ASTEROID TO FLY IN
   </div>
 
-  <!-- Hover Tooltip -->
   <div id="hover-tooltip"></div>
 
-  <!-- Targeting Reticle Overlay (Active when tracking asteroid) -->
   <div id="targeting-reticle">
     <div class="reticle-outer-ring"></div>
     <div class="reticle-inner-ring"></div>
@@ -756,21 +712,18 @@ CINEMATIC_THREEJS_TEMPLATE = """
     <div class="reticle-tag" id="reticle-status">TARGET LOCK: ACTIVE</div>
   </div>
 
-  <!-- Slide-in Telemetry Drawer (Apple / SpaceX Minimalist) -->
   <div id="telemetry-drawer">
     <div class="drawer-close" onclick="resetToEarthView()">×</div>
     <div class="target-tag">TARGET TELEMETRY</div>
     <div class="target-name" id="drawer-name">---</div>
     <div id="drawer-threat" class="threat-pill">---</div>
 
-    <!-- Scale Silhouette Card -->
     <div class="scale-card">
       <div class="scale-card-title">HUMAN-SCALE PHYSICAL COMPARISON</div>
       <div class="scale-analogy-text" id="drawer-scale">---</div>
       <div class="silhouette-canvas" id="drawer-silhouette"></div>
     </div>
 
-    <!-- Telemetry Readout -->
     <div class="telemetry-row">
       <span class="telemetry-label">ESTIMATED DIAMETER</span>
       <span class="telemetry-value" id="drawer-diameter">---</span>
@@ -794,7 +747,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
   </div>
 
   <script>
-    // 1. DATA INGESTION & CONFIGURATION
     const AUTO_PILOT_ENABLED = __AUTO_PILOT_ENABLED__;
     let asteroidData = [];
     try {
@@ -803,7 +755,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       asteroidData = [];
     }
 
-    // Safety fallback: Ensure asteroidData is never empty
     if (!asteroidData || asteroidData.length === 0) {
       asteroidData = [
         {"Name": "SIM-ALPHA", "Diameter (m)": 250, "Velocity (km/h)": 45000, "Miss Distance (km)": 2500000, "Hazardous": true, "Scale Analogy": "Eiffel Tower scale", "Lunar Distance (LD)": 6.5},
@@ -811,7 +762,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       ];
     }
 
-    // JavaScript Global Error Boundary wrapping entire Three.js execution
+    // Initialize Three.js engine
     try {
       console.log("NEO Sentinel Engine Initialized. Loaded asteroids:", asteroidData ? asteroidData.length : 0);
 
@@ -826,7 +777,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const tooltip = document.getElementById('hover-tooltip');
       const drawer = document.getElementById('telemetry-drawer');
 
-      // 2. SCENE, CAMERA, RENDERER & LIGHTING
+      // Scene, camera, and renderer setup
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x000000);
 
@@ -842,8 +793,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.0;
-      
-      // Explicitly append to container
       container.appendChild(renderer.domElement);
 
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -852,22 +801,16 @@ CINEMATIC_THREEJS_TEMPLATE = """
       controls.minDistance = 14;
       controls.maxDistance = 400;
 
-      // -------------------------------------------------------------
-      // VACUUM LIGHTING & SOLAR SCALE
-      // Space is a vacuum; shadows are absolute. Ambient at 0.015.
-      // -------------------------------------------------------------
+      // Solar directional light and deep vacuum ambient
       const sunPosition = new THREE.Vector3(1200, 400, -1200);
       const sunLight = new THREE.DirectionalLight(0xffffff, 4.0);
       sunLight.position.copy(sunPosition);
       scene.add(sunLight);
 
-      // Deep vacuum ambient (no secondary fill lights)
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.015);
       scene.add(ambientLight);
 
-      // -------------------------------------------------------------
-      // THE SUN (Visible Deep Space Star via Sprite)
-      // -------------------------------------------------------------
+      // Solar sprite
       function createSunCanvasTexture() {
         const c = document.createElement('canvas');
         c.width = 512;
@@ -875,12 +818,12 @@ CINEMATIC_THREEJS_TEMPLATE = """
         const ctx = c.getContext('2d');
 
         const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
-        grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');     // Blinding white core
-        grad.addColorStop(0.08, 'rgba(255, 252, 220, 0.98)');   // Stellar photosphere
-        grad.addColorStop(0.24, 'rgba(255, 195, 60, 0.8)');     // Solar chromosphere
-        grad.addColorStop(0.50, 'rgba(255, 110, 20, 0.35)');    // Coronal halo
-        grad.addColorStop(0.75, 'rgba(255, 45, 10, 0.12)');     // Diffraction flare
-        grad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');           // Deep void falloff
+        grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+        grad.addColorStop(0.08, 'rgba(255, 252, 220, 0.98)');
+        grad.addColorStop(0.24, 'rgba(255, 195, 60, 0.8)');
+        grad.addColorStop(0.50, 'rgba(255, 110, 20, 0.35)');
+        grad.addColorStop(0.75, 'rgba(255, 45, 10, 0.12)');
+        grad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
 
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 512, 512);
@@ -903,9 +846,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       sunSprite.scale.set(1500, 1500, 1);
       scene.add(sunSprite);
 
-      // -------------------------------------------------------------
-      // UPGRADE 3: MILKY WAY BACKGROUND (Deep Space Skysphere)
-      // -------------------------------------------------------------
+      // Skysphere and starfield
       const textureLoader = new THREE.TextureLoader();
       textureLoader.crossOrigin = 'anonymous';
 
@@ -921,7 +862,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const skyDome = new THREE.Mesh(skyGeo, skyMat);
       scene.add(skyDome);
 
-      // Foreground starfield for 3D parallax depth
       const starCount = 2000;
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
@@ -952,16 +892,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
       });
       scene.add(new THREE.Points(starGeo, starMat));
 
-      // -------------------------------------------------------------
-      // CINEMATIC EARTH, NIGHT LIGHTS & ATMOSPHERE SHADERS
-      // -------------------------------------------------------------
+      // Earth, clouds, and atmosphere shaders
       const earthDayTex = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
       const earthNormalTex = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg');
       const earthSpecularTex = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg');
       const earthCloudsTex = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png');
       const earthLightsTex = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_lights_2048.png');
 
-      // Earth Sphere (radius 10) - Contrast: roughness 0.85, metalness 0.05
       const earthGeo = new THREE.SphereGeometry(10, 64, 64);
       const earthMat = new THREE.MeshStandardMaterial({
         color: 0x1d365d,
@@ -976,7 +913,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         emissiveIntensity: 1.0
       });
 
-      // Mask emissive city lights strictly to dark side with custom GLSL terminator shading
+      // City lights night terminator shader
       try {
         earthMat.onBeforeCompile = (shader) => {
           shader.uniforms.uSunDir = { value: sunPosition.clone().normalize() };
@@ -1003,7 +940,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const earthMesh = new THREE.Mesh(earthGeo, earthMat);
       scene.add(earthMesh);
 
-      // Realistic Cloud Deck (radius 10.18)
       const cloudGeo = new THREE.SphereGeometry(10.18, 64, 64);
       const cloudMat = new THREE.MeshLambertMaterial({
         map: earthCloudsTex,
@@ -1014,7 +950,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
       scene.add(cloudMesh);
 
-      // Rayleigh Scattering Atmospheric Glow Halo (radius 10.42)
       const atmosphereGeo = new THREE.SphereGeometry(10.42, 64, 64);
       const atmosphereMat = new THREE.ShaderMaterial({
         vertexShader: `
@@ -1054,9 +989,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const atmosphereMesh = new THREE.Mesh(atmosphereGeo, atmosphereMat);
       scene.add(atmosphereMesh);
 
-      // -------------------------------------------------------------
-      // UPGRADE 2: MALÉ GROUND STATION (LAT/LON TELEMETRY MARKER)
-      // -------------------------------------------------------------
+      // Ground station telemetry marker
       function latLonToCartesian(lat, lon, radius) {
         const phi = (90 - lat) * (Math.PI / 180);
         const theta = (lon + 180) * (Math.PI / 180);
@@ -1066,7 +999,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         return new THREE.Vector3(x, y, z);
       }
 
-      // Malé, Maldives Coordinates: Lat 4.1755° N, Lon 73.5093° E
+      // Malé station coordinates (4.1755° N, 73.5093° E)
       const maleLat = 4.1755;
       const maleLon = 73.5093;
       const malePos = latLonToCartesian(maleLat, maleLon, 10.05);
@@ -1074,16 +1007,14 @@ CINEMATIC_THREEJS_TEMPLATE = """
       const maleStationGroup = new THREE.Group();
       maleStationGroup.position.copy(malePos);
 
-      // Orient beacon perpendicular to surface normal
       const surfaceNormal = malePos.clone().normalize();
       maleStationGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), surfaceNormal);
 
-      // Cyan glowing command beacon cylinder
       const beaconGeo = new THREE.CylinderGeometry(0.08, 0.16, 0.45, 16);
       const beaconMat = new THREE.MeshStandardMaterial({
         color: 0x00f0ff,
         emissive: 0x00f0ff,
-        emissiveIntensity: 2.2, // High luminance to emit optical bloom glare
+        emissiveIntensity: 2.2,
         roughness: 0.25,
         metalness: 0.85
       });
@@ -1091,12 +1022,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
       beaconMesh.position.y = 0.22;
       maleStationGroup.add(beaconMesh);
 
-      // Uplink point light
       const maleLight = new THREE.PointLight(0x00f0ff, 2.5, 6.0);
       maleLight.position.y = 0.5;
       maleStationGroup.add(maleLight);
 
-      // Pulsing radar ping wave ring
       const ringGeo = new THREE.RingGeometry(0.12, 0.35, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0x00f0ff,
@@ -1109,10 +1038,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
       pingRing.position.y = 0.02;
       maleStationGroup.add(pingRing);
 
-      // Attach to earthMesh so it rotates in sync with the Maldives on the planet
       earthMesh.add(maleStationGroup);
 
-      // Telemetry metadata for interactive raycasting
       beaconMesh.userData = {
         name: "MALÉ GROUND COMMAND",
         isStation: true,
@@ -1121,14 +1048,11 @@ CINEMATIC_THREEJS_TEMPLATE = """
         group: maleStationGroup
       };
 
-      // -------------------------------------------------------------
-      // 4. PHOTOREALISTIC ASTEROIDS & GEOCENTRIC SHALLOW FLYBYS
-      // -------------------------------------------------------------
-      const TIME_SCALE = 0.15; // Precision time dilation for targeting assist
+      // Asteroid trajectory curves and geometry
+      const TIME_SCALE = 0.15;
       const asteroidGroups = [];
-      const interactiveObjects = [beaconMesh]; // Ground station + invisible hitboxes
+      const interactiveObjects = [beaconMesh];
 
-      // High-resolution seamless micro-texture for dusty Bennu-like surface
       const asteroidBumpMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
       asteroidBumpMap.wrapS = THREE.RepeatWrapping;
       asteroidBumpMap.wrapT = THREE.RepeatWrapping;
@@ -1155,21 +1079,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
           const missLd = Number(ast["Lunar Distance (LD)"]) || (missKm / 384400.0);
           const scaleAnalogy = ast["Scale Analogy"] || "Scale unknown";
 
-          // Closest approach radius from Earth center (between 18 and 82 units)
           const normDist = (maxMiss > minMiss) ? (missKm - minMiss) / (maxMiss - minMiss) : 0.5;
           const periRadius = 18 + normDist * 64;
 
           const inclination = (((idx * 43) % 75) - 37.5) * (Math.PI / 180);
           const theta = (idx / Math.max(1, asteroidData.length)) * Math.PI * 2;
 
-          // 1. Closest-Approach Coordinate (Middle / Periapsis at Miss Distance)
+          // Periapsis coordinates
           const pMiddle = new THREE.Vector3(
             periRadius * Math.cos(theta),
             periRadius * Math.sin(theta) * Math.sin(inclination),
             periRadius * Math.sin(theta) * Math.cos(inclination)
           );
 
-          // Normal & Tangent vectors in orbital plane
           const normal = pMiddle.clone().normalize();
           const tangent = new THREE.Vector3(
             -Math.sin(theta),
@@ -1177,7 +1099,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
             Math.cos(theta) * Math.cos(inclination)
           ).normalize();
 
-          // 2. Deep space hyperbolic asymptotes (incoming and outgoing)
+          // Hyperbolic trajectory asymptotes
           const dDeep = 450 + normDist * 180;
           const pStart = pMiddle.clone()
             .sub(tangent.clone().multiplyScalar(dDeep))
@@ -1186,10 +1108,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
             .add(tangent.clone().multiplyScalar(dDeep))
             .add(normal.clone().multiplyScalar(dDeep * 0.08));
 
-          // 3. CatmullRomCurve3 with 3 points and tension 0.1 for true geocentric shallow hyperbola
+          // Trajectory spline
           const curve = new THREE.CatmullRomCurve3([pStart, pMiddle, pEnd], false, 'catmullrom', 0.1);
 
-          // 4. Trajectory line with fading LineBasicMaterial (fades to 0 in deep space)
+          // Trajectory line geometry and vertex colors
           const curvePts = curve.getPoints(120);
           const colors = [];
           const peakCol = isHazard ? new THREE.Color(0xff003c) : new THREE.Color(0x00f0ff);
@@ -1197,7 +1119,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
           for (let s = 0; s < curvePts.length; s++) {
             const normS = s / (curvePts.length - 1);
-            // Bell curve: fades to 0 in deep space, peaks at periapsis approach (s = 0.5)
             const intensity = Math.pow(Math.sin(normS * Math.PI), 1.6);
             const col = voidCol.clone().lerp(peakCol, intensity);
             colors.push(col.r, col.g, col.b);
@@ -1216,12 +1137,11 @@ CINEMATIC_THREEJS_TEMPLATE = """
           const flybyLine = new THREE.Line(pathGeo, pathMat);
           scene.add(flybyLine);
 
-          // 5. HYPER-DETAILED LEVEL 6 GEOMETRY & SHARP PROCEDURAL RIDGE/CRATERING
+          // High-density geometry and procedural displacement
           const normDiam = (maxDiam > minDiam) ? (diamM - minDiam) / (maxDiam - minDiam) : 0.5;
           const geoSize = 0.55 + normDiam * 1.5;
           const astGeo = new THREE.IcosahedronGeometry(geoSize, 6);
 
-          // Sharp ridge function and deep gouges using absolute and squared trigonometric wave harmonics
           const posAttr = astGeo.attributes.position;
           const v = new THREE.Vector3();
           const craterCenter = new THREE.Vector3(
@@ -1234,25 +1154,17 @@ CINEMATIC_THREEJS_TEMPLATE = """
             v.fromBufferAttribute(posAttr, p);
             const dir = v.clone().normalize();
             
-            // 1. Sharp Ridge Function: using absolute/folded sine waves to form sharp tectonic spines and faceted ridges
             const ridge1 = (1.0 - Math.abs(Math.sin(dir.x * 2.4 + idx * 0.7))) * 0.16;
             const ridge2 = Math.pow(Math.abs(Math.cos(dir.z * 3.6 + dir.y * 2.2)), 2.0) * 0.10;
-            
-            // 2. Deep Gouges / Chasms: negative squared sine depressions carving out deep craters and crevices
             const gouge1 = -Math.pow(Math.abs(Math.sin(dir.y * 4.5 + dir.x * 3.2)), 2.5) * 0.12;
             const gouge2 = -Math.pow(Math.abs(Math.cos(dir.z * 6.0 + dir.x * 1.5)), 3.0) * 0.08;
-            
-            // 3. Micro regolith texture: fine high-frequency noise
             const microGrain = Math.sin(dir.x * 18.0) * Math.cos(dir.y * 18.0) * Math.sin(dir.z * 18.0) * 0.02;
             
-            // 4. Sharp Crater Rim Function
             const angleToCrater = dir.angleTo(craterCenter);
             let craterDisp = 0.0;
             if (angleToCrater < 0.50) {
-              const u = angleToCrater / 0.50; // 0 at center, 1 at boundary
-              // Deep central excavation bowl (squared cosine)
+              const u = angleToCrater / 0.50;
               const bowl = -Math.pow(Math.cos(Math.min(1.0, u * 1.25) * Math.PI * 0.5), 2.0) * 0.22;
-              // Sharp elevated impact rim at u between 0.55 and 1.0
               const rim = Math.pow(Math.sin(Math.max(0.0, (u - 0.55) / 0.45) * Math.PI), 2.0) * 0.09;
               craterDisp = bowl + rim;
             }
@@ -1262,10 +1174,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
             posAttr.setXYZ(p, v.x, v.y, v.z);
           }
 
-          // CRITICAL: Recompute smooth vertex normals across all Level 6 vertices
           astGeo.computeVertexNormals();
 
-          // Randomized Newtonian 3D rotation axis and tumbling speed
           const rotAxis = new THREE.Vector3(
             (Math.random() - 0.5) * 2,
             (Math.random() - 0.5) * 2,
@@ -1273,7 +1183,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
           ).normalize();
           const rotSpeed = 0.005 + Math.random() * 0.015;
 
-          // Photorealistic Low-Albedo Asteroid Material (Exaggerated Micro-Porous Regolith)
           const astMat = new THREE.MeshStandardMaterial({
             color: 0x222426,
             roughness: 0.95,
@@ -1288,7 +1197,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
           });
           const rockMesh = new THREE.Mesh(astGeo, astMat);
 
-          // Menacing neon rim-marker for hazards
           if (isHazard) {
             const markerGeo = new THREE.RingGeometry(geoSize * 1.4, geoSize * 1.55, 32);
             const markerMat = new THREE.MeshBasicMaterial({
@@ -1302,18 +1210,15 @@ CINEMATIC_THREEJS_TEMPLATE = """
             rockMesh.add(marker);
           }
 
-          // 6. Invisible 8x Raycast Hitbox (effortless targeting)
           const hitboxRadius = geoSize * 8.0;
           const hitboxGeo = new THREE.SphereGeometry(hitboxRadius, 16, 16);
           const hitboxMat = new THREE.MeshBasicMaterial({ visible: false });
           const hitboxMesh = new THREE.Mesh(hitboxGeo, hitboxMat);
 
-          // 7. Group the visible rock and the invisible hitbox together
           const astGroup = new THREE.Group();
           astGroup.add(rockMesh);
           astGroup.add(hitboxMesh);
 
-          // Initial parameter t along the curve (0.0 to 1.0)
           const startT = (idx * 0.28 + 0.15) % 1.0;
           const flybySpeed = (velKmh / 60000.0) * 0.0006 + 0.0003;
 
@@ -1346,15 +1251,11 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
           scene.add(astGroup);
           asteroidGroups.push(telemetryData);
-
-          // Point Raycaster specifically at hitboxes for effortless targeting
           interactiveObjects.push(hitboxMesh);
         });
       }
 
-      // -------------------------------------------------------------
-      // 5. RAYCASTING & TWEEN.JS FLY-TO TRANSITIONS
-      // -------------------------------------------------------------
+      // Interaction and camera transitions
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2(-999, -999);
       let hoveredMesh = null;
@@ -1371,11 +1272,9 @@ CINEMATIC_THREEJS_TEMPLATE = """
         }
       });
 
-      // Click to Fly-To Asteroid or Ground Station
       window.addEventListener('click', (e) => {
         if (e.target.closest('#telemetry-drawer') || e.target.closest('#reset-control')) return;
 
-        // Manual canvas click detected: disengage auto-pilot
         stopAutoPilot();
 
         raycaster.setFromCamera(mouse, camera);
@@ -1391,7 +1290,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
         }
       });
 
-      // Escape Key Listener to Reset View & Disengage Auto-Pilot
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           stopAutoPilot();
@@ -1421,7 +1319,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
           .easing(TWEEN.Easing.Cubic.InOut)
           .start();
 
-        // Populate Telemetry Drawer
         document.getElementById('drawer-name').innerText = data.name;
         
         const threatEl = document.getElementById('drawer-threat');
@@ -1447,7 +1344,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
         renderSilhouette(data.diameter, data.scaleAnalogy);
         drawer.style.right = '0px';
 
-        // Activate HUD Targeting Reticle overlay
         const reticle = document.getElementById('targeting-reticle');
         const reticleTag = document.getElementById('reticle-status');
         if (reticle) {
@@ -1459,7 +1355,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
             reticle.classList.remove('hazard');
             if (reticleTag) reticleTag.innerText = `⌖ LOCK: ${data.name} [NOMINAL]`;
           }
-          // Immediate initial 3D-to-2D screen projection
           const vector = group.position.clone();
           vector.project(camera);
           const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
@@ -1475,7 +1370,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
         isTracking = false;
         tooltip.style.display = 'none';
 
-        // Calculate world position of the ground station
         const worldPos = new THREE.Vector3();
         mesh.getWorldPosition(worldPos);
 
@@ -1491,7 +1385,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
           .easing(TWEEN.Easing.Cubic.InOut)
           .start();
 
-        // Display Ground Station Telemetry in Drawer
         document.getElementById('drawer-name').innerText = "MALÉ COMMAND";
         const threatEl = document.getElementById('drawer-threat');
         threatEl.className = 'threat-pill threat-safe';
@@ -1516,7 +1409,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
         drawer.style.right = '0px';
 
-        // Deactivate Asteroid Reticle on Ground Station
         const reticle = document.getElementById('targeting-reticle');
         if (reticle) {
           reticle.classList.remove('active');
@@ -1531,7 +1423,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
         selectedMesh = null;
         drawer.style.right = '-450px';
 
-        // Deactivate HUD Targeting Reticle overlay
         const reticle = document.getElementById('targeting-reticle');
         if (reticle) {
           reticle.classList.remove('active');
@@ -1588,9 +1479,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         `;
       }
 
-      // -------------------------------------------------------------
-      // 6. AUTO-PILOT / ATTRACT MODE (Self-Playing QA)
-      // -------------------------------------------------------------
+      // Auto-pilot tour mode
       let autoPilotInterval = null;
       let autoPilotIndex = 0;
 
@@ -1624,13 +1513,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
           const targetName = (target && target.name) ? target.name : (asteroidData[autoPilotIndex] ? asteroidData[autoPilotIndex].Name : `TARGET-${autoPilotIndex + 1}`);
 
           console.log("[AUTOPILOT] Engaging target lock: " + targetName);
-
-          // Advance target index for next cycle (looping back to 0 at the end)
           autoPilotIndex = (autoPilotIndex + 1) % asteroidGroups.length;
 
-          // Programmatically execute the exact same logic that Raycaster click event uses:
-          // flyToAsteroid assigns selectedMesh, triggers TWEEN camera fly-in,
-          // slides the drawer out (drawer.style.right = '0px'), populates HTML data, and updates reticle.
           if (target && target.hitbox) {
             flyToAsteroid(target.hitbox);
           } else if (target && target.group) {
@@ -1638,52 +1522,44 @@ CINEMATIC_THREEJS_TEMPLATE = """
           }
         }
 
-        // Fire initial target lock immediately on engagement
         cycleNextTarget();
-
-        // Start 8-second (8000ms) interval
         autoPilotInterval = setInterval(cycleNextTarget, 8000);
       }
 
       window.triggerAutoPilot = triggerAutoPilot;
       window.stopAutoPilot = stopAutoPilot;
 
-      // -------------------------------------------------------------
-      // 7. ANIMATION & RENDER LOOP
-      // -------------------------------------------------------------
+      // Render loop
       const clock = new THREE.Clock();
 
       function animate() {
         requestAnimationFrame(animate);
         const elapsed = clock.getElapsedTime();
 
-        // Update TWEEN
         TWEEN.update();
 
-        // Earth & Clouds Rotation
+        // Planetary rotation
         earthMesh.rotation.y += 0.0011;
         cloudMesh.rotation.y += 0.0017;
 
-        // Malé Radar Pulse Animation
+        // Ground station radar pulse
         const pingPhase = (elapsed * 1.8) % 1.0;
         pingRing.scale.set(1.0 + pingPhase * 3.2, 1.0 + pingPhase * 3.2, 1.0);
         ringMat.opacity = Math.max(0.0, 0.9 * (1.0 - pingPhase));
         maleLight.intensity = 1.2 + 0.8 * Math.sin(elapsed * 6.0);
 
-        // Asteroids Kinematics (Time Dilation via TIME_SCALE) & Newtonian 3D Tumbling
+        // Asteroid kinematics and tumbling
         asteroidGroups.forEach((item) => {
-          // Multiply t progression by TIME_SCALE
           item.t = (item.t + item.speed * TIME_SCALE) % 1.0;
           const currentPos = item.curve.getPoint(item.t);
           item.group.position.copy(currentPos);
 
-          // Newtonian 3D tumbling rotation around randomized normalized axis
           if (item.rotAxis && item.rotSpeed) {
             item.rock.rotateOnAxis(item.rotAxis, item.rotSpeed);
           }
         });
 
-        // Smooth camera lock-on & Real-time 3D-to-2D Reticle Projection
+        // Target tracking and screen-space reticle projection
         if (isTracking && selectedMesh) {
           controls.target.copy(selectedMesh.position);
 
@@ -1691,7 +1567,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
           if (reticle && reticle.classList.contains('active')) {
             const vector = selectedMesh.position.clone();
             vector.project(camera);
-            if (vector.z < 1.0) { // In front of the camera
+            if (vector.z < 1.0) {
               const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
               const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
               reticle.style.left = x + 'px';
@@ -1703,7 +1579,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
           }
         }
 
-        // Raycasting Hover Reticle & Cursor pointer
+        // Raycast hover detection
         raycaster.setFromCamera(mouse, camera);
         const hits = raycaster.intersectObjects(interactiveObjects);
 
@@ -1734,13 +1610,15 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
       animate();
 
-      // 8. AUTO-PILOT INITIALIZATION (QA / Attract Mode)
       if (typeof AUTO_PILOT_ENABLED !== 'undefined' && AUTO_PILOT_ENABLED) {
         triggerAutoPilot();
       }
 
-      // 9. WINDOW RESIZE HANDLER (Responsive & Split-Screen)
-      window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
 
     } catch (error) {
       document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top: 20%; font-family:monospace;'>CRASH: " + error.message + "</h1><pre style='color:#ff8888; text-align:center; font-family:monospace;'>" + (error.stack || '') + "</pre>";
@@ -1768,19 +1646,13 @@ def render_eyes_on_asteroids(df: pd.DataFrame, target_date: str, autopilot_enabl
     return html_code
 
 
-# ---------------------------------------------------------
-# 4. STREAMLIT APPLICATION ENTRY POINT (Pure Data-Server)
-# ---------------------------------------------------------
 def main():
-    # 1. TEMPORAL STATE INITIALIZATION
     if "sim_date_input" not in st.session_state:
         st.session_state["sim_date_input"] = datetime.today().date()
 
-    # Time Warp callback: Programmatically sets the date picker state before rerun
     def warp_to_origin():
         st.session_state["sim_date_input"] = date(2005, 11, 18)
 
-    # 2. STREAMLIT SIDEBAR CONTROLS
     with st.sidebar:
         st.markdown(
             """
@@ -1807,7 +1679,6 @@ def main():
         st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
         autopilot_toggle = st.toggle("Engage Auto-Pilot (QA Mode)", key="autopilot_toggle", value=False)
 
-    # 3. DATE NORMALIZATION & DATA FETCHING
     if isinstance(selected_date_val, (list, tuple)):
         selected_date_val = selected_date_val[0]
     if isinstance(selected_date_val, (datetime, date)):
@@ -1817,7 +1688,6 @@ def main():
 
     df = fetch_asteroid_data(target_date)
 
-    # Absolute guarantee: Do not let the rest of the application execute if df has 0 rows
     if df is None or df.empty:
         df = pd.DataFrame([
             {"Name": "SIM-ALPHA", "Diameter (m)": 250, "Velocity (km/h)": 45000, "Miss Distance (km)": 2500000, "Hazardous": True},
@@ -1826,7 +1696,6 @@ def main():
         df["Scale Analogy"] = df["Diameter (m)"].apply(get_scale_comparison)
         df["Lunar Distance (LD)"] = df["Miss Distance (km)"] / 384400.0
 
-    # 4. SIDEBAR MISSION TELEMETRY STATUS
     with st.sidebar:
         haz_count = int(df["Hazardous"].sum()) if "Hazardous" in df.columns else 0
         ap_badge = '<span style="color:#00f0ff; font-weight:700;">ENGAGED (8s CYCLE)</span>' if autopilot_toggle else '<span style="color:rgba(255,255,255,0.5);">STANDBY</span>'
@@ -1855,7 +1724,6 @@ def main():
             unsafe_allow_html=True,
         )
 
-    # 5. DYNAMIC THREE.JS ENGINE SYNC & RENDERING
     html_content = render_eyes_on_asteroids(df, target_date, autopilot_enabled=autopilot_toggle)
     components.html(html_content, height=1000, scrolling=False)
 
