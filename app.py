@@ -240,6 +240,10 @@ div[data-baseweb="calendar"] {
     max-width: 100vw !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
     overflow: hidden !important;
     background-color: #000000 !important;
 }
@@ -250,9 +254,11 @@ iframe {
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
     border: none !important;
     display: block !important;
     z-index: 1 !important;
+    overflow: hidden !important;
 }
 
 @media (max-width: 768px) {
@@ -274,8 +280,21 @@ iframe {
     [data-testid="stSidebarTrigger"] {
         top: 10px !important;
         left: 10px !important;
-        width: 38px !important;
-        height: 38px !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        z-index: 1000000 !important;
+        pointer-events: auto !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        z-index: 1000000 !important;
+        pointer-events: auto !important;
     }
 
     #top-nav {
@@ -290,6 +309,9 @@ iframe {
     #telemetry-drawer {
         width: 100vw !important;
         max-width: 100vw !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        border-radius: 16px 16px 0 0 !important;
     }
     #telemetry-drawer h1 { font-size: 16px !important; }
     #telemetry-drawer h2 { font-size: 14px !important; }
@@ -413,9 +435,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: hidden !important;
       background: #000000;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
@@ -425,15 +451,26 @@ CINEMATIC_THREEJS_TEMPLATE = """
     }
 
     #canvas-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: hidden !important;
       z-index: 1;
       background: #000000;
       touch-action: none;
+    }
+
+    #canvas-container canvas {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      display: block !important;
     }
 
     .glass-pill {
@@ -606,10 +643,12 @@ CINEMATIC_THREEJS_TEMPLATE = """
     #telemetry-drawer .close-btn, #telemetry-drawer button { pointer-events: auto !important; cursor: pointer !important; z-index: 1000000 !important; position: relative; }
     .drawer-close {
       position: absolute !important;
-      top: 24px !important;
-      right: 24px !important;
-      width: 34px !important;
-      height: 34px !important;
+      top: 20px !important;
+      right: 20px !important;
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
       border-radius: 50% !important;
       display: flex !important;
       align-items: center !important;
@@ -618,7 +657,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       border: 1px solid rgba(0, 240, 255, 0.4) !important;
       cursor: pointer !important;
       color: #ffffff !important;
-      font-size: 18px !important;
+      font-size: 24px !important;
       line-height: 1 !important;
       transition: all 0.2s ease !important;
       pointer-events: auto !important;
@@ -840,31 +879,57 @@ CINEMATIC_THREEJS_TEMPLATE = """
         font-size: 12px !important;
         gap: 6px !important;
         top: 8px !important;
-        max-width: 94vw !important;
+        width: 92vw !important;
+        max-width: 92vw !important;
+        box-sizing: border-box !important;
         pointer-events: none !important;
       }
       #top-nav span,
       #top-nav div,
       .brand-title,
       .nav-meta {
-        font-size: 12px !important;
+        font-size: 11px !important;
       }
       #top-nav .nav-sep {
-        font-size: 10px !important;
+        font-size: 9px !important;
         margin: 0 1px !important;
       }
 
-      /* Telemetry Drawer full width */
+      /* Telemetry Drawer: fluid responsive bottom sheet modal */
       #telemetry-drawer {
         width: 100vw !important;
         max-width: 100vw !important;
-        right: -100vw;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        top: auto !important;
+        height: auto !important;
+        max-height: 80vh !important;
+        max-height: 80dvh !important;
+        border-radius: 16px 16px 0 0 !important;
+        border-left: none !important;
+        border-top: 1px solid rgba(0, 240, 255, 0.4) !important;
         backdrop-filter: blur(28px) !important;
         -webkit-backdrop-filter: blur(28px) !important;
-        background: rgba(10, 15, 30, 0.95) !important;
-        padding: 20px 16px !important;
-        border-left: none !important;
+        background: rgba(10, 15, 30, 0.96) !important;
+        padding: 24px 18px 30px 18px !important;
         box-sizing: border-box !important;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85) !important;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+        opacity: 0;
+        pointer-events: none;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        z-index: 100000 !important;
+      }
+
+      #telemetry-drawer.open,
+      #telemetry-drawer[style*="right: 0px"],
+      #telemetry-drawer[style*="right:0px"] {
+        transform: translateY(0%) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
       }
 
       /* Mobile typography scaling: >= 30% reduction to prevent text overflow */
@@ -873,9 +938,9 @@ CINEMATIC_THREEJS_TEMPLATE = """
       #telemetry-drawer h3 { font-size: 12px !important; }
       #telemetry-drawer p { font-size: 11px !important; }
       #telemetry-drawer .target-tag { font-size: 8px !important; letter-spacing: 1.5px !important; }
-      #telemetry-drawer .target-name { font-size: 16px !important; margin-bottom: 8px !important; }
-      #telemetry-drawer .threat-pill { font-size: 9.5px !important; padding: 4px 8px !important; margin-bottom: 16px !important; }
-      #telemetry-drawer .scale-card { padding: 12px !important; margin-bottom: 16px !important; }
+      #telemetry-drawer .target-name { font-size: 18px !important; margin-bottom: 8px !important; }
+      #telemetry-drawer .threat-pill { font-size: 9.5px !important; padding: 4px 8px !important; margin-bottom: 14px !important; }
+      #telemetry-drawer .scale-card { padding: 12px !important; margin-bottom: 14px !important; }
       #telemetry-drawer .scale-card-title { font-size: 8.5px !important; }
       #telemetry-drawer .scale-analogy-text { font-size: 11px !important; margin-bottom: 6px !important; }
       #telemetry-drawer .silhouette-canvas { height: 50px !important; }
@@ -891,25 +956,52 @@ CINEMATIC_THREEJS_TEMPLATE = """
         gap: 2px !important;
       }
 
+      /* Minimum 48px x 48px interactive touch targets */
+      .drawer-close,
+      #telemetry-drawer .close-btn,
+      #telemetry-drawer button {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        top: 14px !important;
+        right: 14px !important;
+        font-size: 26px !important;
+        pointer-events: auto !important;
+        z-index: 1000000 !important;
+      }
+
       #reset-control {
         bottom: 16px !important;
-        left: 16px !important;
-        padding: 8px 14px !important;
+        left: 14px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        padding: 10px 14px !important;
         font-size: 11px !important;
         pointer-events: auto !important;
+        z-index: 1000000 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
 
       #hud-sidebar-toggle {
         bottom: 16px !important;
-        left: 155px !important;
-        padding: 8px 12px !important;
+        left: 160px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        padding: 10px 14px !important;
         font-size: 11px !important;
         pointer-events: auto !important;
+        z-index: 1000000 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
 
       #targeting-reticle {
-        width: 130px !important;
-        height: 130px !important;
+        width: 120px !important;
+        height: 120px !important;
         pointer-events: none !important;
       }
     }
@@ -1349,6 +1441,9 @@ CINEMATIC_THREEJS_TEMPLATE = """
       // Asteroid trajectory curves and geometry
       const TIME_SCALE = 0.15;
       const asteroidGroups = [];
+      const asteroidGroup = new THREE.Group();
+      scene.add(asteroidGroup);
+      asteroidGroup.add(beaconMesh);
       const interactiveObjects = [beaconMesh];
 
       const asteroidBumpMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
@@ -1547,7 +1642,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
           const initialPos = curve.getPoint(startT);
           astGroup.position.copy(initialPos);
 
-          scene.add(astGroup);
+          asteroidGroup.add(astGroup);
           asteroidGroups.push(telemetryData);
           interactiveObjects.push(hitboxMesh);
         });
@@ -1560,9 +1655,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
       let selectedMesh = null;
       let isTracking = false;
 
+      function triggerTargetLock(target) {
+        stopAutoPilot();
+        if (target.userData && target.userData.isStation) {
+          flyToStation(target);
+        } else {
+          flyToAsteroid(target);
+        }
+      }
+
       window.addEventListener('mousemove', (e) => {
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
         if (hoveredMesh) {
           tooltip.style.left = e.clientX + 'px';
@@ -1573,64 +1678,43 @@ CINEMATIC_THREEJS_TEMPLATE = """
       let touchStartX = 0;
       let touchStartY = 0;
 
-      window.addEventListener('touchstart', (e) => {
+      renderer.domElement.addEventListener('touchstart', (e) => {
         if (e.touches && e.touches.length > 0) {
           touchStartX = e.touches[0].clientX;
           touchStartY = e.touches[0].clientY;
         }
       }, { passive: true });
 
-      function onDocumentTouchEnd(event) {
-        if (!event.changedTouches || event.changedTouches.length === 0) return;
-        const touch = event.changedTouches[0];
+      renderer.domElement.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 0) return;
+        const touch = e.changedTouches[0];
 
         const deltaX = touch.clientX - touchStartX;
         const deltaY = touch.clientY - touchStartY;
-        if (Math.hypot(deltaX, deltaY) > 12) return;
+        if (Math.hypot(deltaX, deltaY) > 15) return;
 
-        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (targetEl && (targetEl.closest('#telemetry-drawer') || targetEl.closest('#reset-control') || targetEl.closest('#hud-sidebar-toggle') || targetEl.closest('#brand-badge') || targetEl.closest('#top-nav'))) {
-          return;
-        }
-
-        mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-
-        stopAutoPilot();
+        // Correct normalized device coordinate (NDC) calculation accounting for mobile padding/margins
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObjects(interactiveObjects);
-
-        if (hits.length > 0) {
-          const hitObj = hits[0].object;
-          if (hitObj.userData.isStation) {
-            flyToStation(hitObj);
-          } else {
-            flyToAsteroid(hitObj);
-          }
+        const intersects = raycaster.intersectObjects(asteroidGroup.children, true);
+        if (intersects.length > 0) {
+          e.preventDefault();
+          triggerTargetLock(intersects[0].object);
         }
-      }
+      }, { passive: false });
 
-      window.addEventListener('touchend', onDocumentTouchEnd, { passive: false });
-
-      window.addEventListener('click', (e) => {
-        if (e.target.closest('#telemetry-drawer') || e.target.closest('#reset-control') || e.target.closest('#hud-sidebar-toggle') || e.target.closest('#brand-badge')) return;
-
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-        stopAutoPilot();
+      renderer.domElement.addEventListener('click', (e) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObjects(interactiveObjects);
-
-        if (hits.length > 0) {
-          const hitObj = hits[0].object;
-          if (hitObj.userData.isStation) {
-            flyToStation(hitObj);
-          } else {
-            flyToAsteroid(hitObj);
-          }
+        const intersects = raycaster.intersectObjects(asteroidGroup.children, true);
+        if (intersects.length > 0) {
+          triggerTargetLock(intersects[0].object);
         }
       });
 
@@ -1686,6 +1770,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         if (incEl) incEl.innerText = `${(data.inclination * (180/Math.PI)).toFixed(1)}°`;
 
         renderSilhouette(data.diameter, data.scaleAnalogy);
+        drawer.classList.add('open');
         drawer.style.right = '0px';
 
         const reticle = document.getElementById('targeting-reticle');
@@ -1751,6 +1836,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
           </div>
         `;
 
+        drawer.classList.add('open');
         drawer.style.right = '0px';
 
         const reticle = document.getElementById('targeting-reticle');
@@ -1765,6 +1851,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         stopAutoPilot();
         isTracking = false;
         selectedMesh = null;
+        drawer.classList.remove('open');
         drawer.style.right = '-100vw';
 
         const reticle = document.getElementById('targeting-reticle');
@@ -1974,7 +2061,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
         // Raycast hover detection
         raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObjects(interactiveObjects);
+        const hits = raycaster.intersectObjects(asteroidGroup.children, true);
 
         if (hits.length > 0) {
           const hitObj = hits[0].object;
@@ -2007,13 +2094,18 @@ CINEMATIC_THREEJS_TEMPLATE = """
         triggerAutoPilot();
       }
 
-      window.addEventListener('resize', () => {
+      function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        if (!isTracking && drawer.style.right !== '0px') {
+        renderer.setSize(window.innerWidth, window.innerHeight, true);
+        if (!isTracking && !drawer.classList.contains('open') && drawer.style.right !== '0px') {
           drawer.style.right = '-100vw';
         }
+      }
+
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(onWindowResize, 150);
       });
 
     } catch (error) {
