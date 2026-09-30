@@ -1051,10 +1051,23 @@ CINEMATIC_THREEJS_TEMPLATE = """
       controls.minDistance = 14;
       controls.maxDistance = 400;
 
-      // Unified atmospheric Sun mesh with procedural radial gradient
+      // 1. ARCHITECTURAL HIERARCHY (The Sun Group)
       const sunPosition = new THREE.Vector3(1200, 400, -1200);
+      const sunGroup = new THREE.Group();
+      sunGroup.position.copy(sunPosition);
+      scene.add(sunGroup);
 
-      // High-resolution procedural 2048x2048 radial gradient texture
+      // 2. PART A: THE SOLID OCCLUDER CORE (Blocks background space)
+      const coreGeo = new THREE.SphereGeometry(120, 32, 32);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        depthWrite: true,
+        depthTest: true
+      });
+      const sunCore = new THREE.Mesh(coreGeo, coreMat);
+      sunGroup.add(sunCore);
+
+      // 3. PART B: THE PROCEDURAL GLOW CORONA (Additive Atmosphere)
       function createSunCanvasTexture() {
         const c = document.createElement('canvas');
         c.width = 2048;
@@ -1103,23 +1116,22 @@ CINEMATIC_THREEJS_TEMPLATE = """
         return tex;
       }
 
-      const sunTexture = createSunCanvasTexture();
-      const sunGeo = new THREE.PlaneGeometry(2400, 2400);
-      const sunMat = new THREE.MeshBasicMaterial({
-        map: sunTexture,
+      const canvasTexture = createSunCanvasTexture();
+      const coronaGeo = new THREE.PlaneGeometry(1600, 1600);
+      const coronaMat = new THREE.MeshBasicMaterial({
+        map: canvasTexture,
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         depthTest: true,
         side: THREE.DoubleSide
       });
-      const sunMesh = new THREE.Mesh(sunGeo, sunMat);
-      sunMesh.position.copy(sunPosition);
-      scene.add(sunMesh);
+      const sunCorona = new THREE.Mesh(coronaGeo, coronaMat);
+      sunGroup.add(sunCorona);
 
       // Primary solar directional light anchored at the exact Sun world position
       const sunLight = new THREE.DirectionalLight(0xffffff, 4.2);
-      sunLight.position.copy(sunMesh.position);
+      sunLight.position.copy(sunGroup.position);
       sunLight.target.position.set(0, 0, 0);
       scene.add(sunLight);
       scene.add(sunLight.target);
@@ -1901,22 +1913,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
         TWEEN.update();
 
-        // Anchor lighting to Sun position and recalculate light vector toward origin/planets
-        const currentSunPos = new THREE.Vector3();
-        sunMesh.getWorldPosition(currentSunPos);
-        sunLight.position.copy(currentSunPos);
+        // 4. PER-FRAME BILLBOARDING & LIGHTING SYNCHRONIZATION
+        sunGroup.position.copy(sunPosition);
+        sunCorona.quaternion.copy(camera.quaternion);
+        sunLight.position.copy(sunGroup.position);
         sunLight.target.position.set(0, 0, 0);
         sunLight.target.updateMatrixWorld();
 
-        // Billboard unified Sun mesh to face camera continuously
-        sunMesh.lookAt(camera.position);
-
-        const currentSunDir = currentSunPos.clone().normalize();
+        const currentSunDir = sunGroup.position.clone().normalize();
         if (earthShaderUniforms && earthShaderUniforms.uSunDir) {
           earthShaderUniforms.uSunDir.value.copy(currentSunDir);
         }
         if (typeof atmosphereMat !== 'undefined' && atmosphereMat.uniforms && atmosphereMat.uniforms.uSunPos) {
-          atmosphereMat.uniforms.uSunPos.value.copy(currentSunPos);
+          atmosphereMat.uniforms.uSunPos.value.copy(sunGroup.position);
         }
 
         // Planetary rotation
