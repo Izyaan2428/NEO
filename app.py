@@ -16,6 +16,9 @@ st.set_page_config(
 
 FULLSCREEN_OVERRIDE_CSS = """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import url('https://fonts.googleapis.com/css2?family=Material+Icons');
+
 #MainMenu, footer {
     visibility: hidden !important;
     display: none !important;
@@ -49,7 +52,8 @@ FULLSCREEN_OVERRIDE_CSS = """
 [data-testid="stSidebar"] h3, 
 [data-testid="stSidebar"] p, 
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span:not(.material-symbols-rounded):not(.material-icons) {
+[data-testid="stSidebar"] p span,
+[data-testid="stSidebar"] label span {
     color: #ffffff !important;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif !important;
 }
@@ -99,19 +103,21 @@ FULLSCREEN_OVERRIDE_CSS = """
     transform: translateY(-1px) !important;
 }
 
-[data-testid="stSidebarCollapseButton"] span,
-[data-testid="stSidebarTrigger"] span,
-.material-symbols-rounded,
-.material-icons {
-    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+[data-testid="collapsedControl"] *, 
+[data-testid="stSidebarCollapseButton"] * { 
+    font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important; 
+    font-size: 24px !important; 
+    color: #00f0ff !important; 
 }
 
+[data-testid="collapsedControl"],
 [data-testid="stSidebarCollapseButton"],
 [data-testid="stSidebarTrigger"] {
     color: #00f0ff !important;
     background: transparent !important;
 }
 
+[data-testid="collapsedControl"] button,
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="stSidebarTrigger"] button {
     background: rgba(18, 22, 36, 0.7) !important;
@@ -121,10 +127,17 @@ FULLSCREEN_OVERRIDE_CSS = """
     transition: all 0.2s ease !important;
 }
 
+[data-testid="collapsedControl"] button:hover,
 [data-testid="stSidebarCollapseButton"] button:hover,
 [data-testid="stSidebarTrigger"] button:hover {
     background: rgba(0, 240, 255, 0.25) !important;
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important;
+}
+
+@media (max-width: 768px) { 
+    [data-testid="collapsedControl"] { 
+        display: none !important; 
+    } 
 }
 
 div[data-baseweb="popover"],
@@ -291,6 +304,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
       user-select: none;
       -webkit-user-select: none;
+      touch-action: none;
     }
 
     #canvas-container {
@@ -302,6 +316,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       overflow: hidden;
       z-index: 1;
       background: #000000;
+      touch-action: none;
     }
 
     .glass-pill {
@@ -329,6 +344,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
       box-sizing: border-box;
       flex-wrap: wrap;
       justify-content: center;
+      pointer-events: none;
+    }
+    #top-nav * {
+      pointer-events: none;
     }
     .status-beacon {
       width: 8px;
@@ -390,6 +409,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       cursor: pointer;
       color: rgba(255, 255, 255, 0.9);
       transition: all 0.25s ease;
+      pointer-events: auto !important;
     }
     #reset-control:hover {
       background: rgba(30, 36, 52, 0.85);
@@ -410,20 +430,53 @@ CINEMATIC_THREEJS_TEMPLATE = """
       pointer-events: none;
     }
 
-    @media (max-width: 820px) {
-      #brand-badge { display: none; }
-      #nav-help { display: none; }
+    @media (max-width: 768px) {
+      #brand-badge { display: none !important; }
+      #nav-help { display: none !important; }
+
       #top-nav {
-        font-size: 11px;
-        padding: 8px 14px;
-        gap: 8px;
-        top: 12px;
+        flex-direction: column;
+        flex-wrap: wrap;
+        font-size: 12px !important;
+        padding: 6px 14px !important;
+        gap: 4px !important;
+        top: 8px !important;
+        max-width: 92vw !important;
+        pointer-events: none !important;
       }
+      #top-nav span,
+      #top-nav div,
+      .brand-title,
+      .nav-meta {
+        font-size: 12px !important;
+      }
+      #top-nav .nav-sep {
+        display: none !important;
+      }
+
+      #telemetry-drawer {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        right: -100vw;
+        backdrop-filter: blur(30px) !important;
+        -webkit-backdrop-filter: blur(30px) !important;
+        background: rgba(10, 15, 30, 0.92) !important;
+        padding: 20px 16px !important;
+        border-left: none !important;
+      }
+
       #reset-control {
-        bottom: 16px;
-        left: 16px;
-        padding: 8px 14px;
-        font-size: 11px;
+        bottom: 16px !important;
+        left: 16px !important;
+        padding: 8px 14px !important;
+        font-size: 11px !important;
+        pointer-events: auto !important;
+      }
+
+      #targeting-reticle {
+        width: 150px !important;
+        height: 150px !important;
+        pointer-events: none !important;
       }
     }
 
@@ -448,6 +501,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       flex-direction: column;
       box-sizing: border-box;
       overflow-y: auto;
+      pointer-events: auto;
     }
     .drawer-close {
       position: absolute;
@@ -465,6 +519,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       color: rgba(255, 255, 255, 0.7);
       font-size: 16px;
       transition: all 0.2s ease;
+      pointer-events: auto !important;
     }
     .drawer-close:hover {
       background: rgba(255, 0, 60, 0.3);
@@ -1421,7 +1476,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         stopAutoPilot();
         isTracking = false;
         selectedMesh = null;
-        drawer.style.right = '-450px';
+        drawer.style.right = window.innerWidth <= 768 ? '-100vw' : '-450px';
 
         const reticle = document.getElementById('targeting-reticle');
         if (reticle) {
@@ -1618,6 +1673,9 @@ CINEMATIC_THREEJS_TEMPLATE = """
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        if (!isTracking && drawer.style.right !== '0px') {
+          drawer.style.right = window.innerWidth <= 768 ? '-100vw' : '-450px';
+        }
       });
 
     } catch (error) {
