@@ -1051,22 +1051,73 @@ CINEMATIC_THREEJS_TEMPLATE = """
       controls.minDistance = 14;
       controls.maxDistance = 400;
 
-      // Solar setup: Solid core mesh with depthWrite: true + outer corona glow sprite
+      // Unified atmospheric Sun mesh with procedural radial gradient
       const sunPosition = new THREE.Vector3(1200, 400, -1200);
 
-      // 1. Solid opaque core mesh with depthWrite: true to guarantee zero see-through bug
-      const sunCoreGeo = new THREE.SphereGeometry(140, 32, 32);
-      const sunCoreMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        depthWrite: true,
-        depthTest: true
+      // High-resolution procedural 2048x2048 radial gradient texture
+      function createSunCanvasTexture() {
+        const c = document.createElement('canvas');
+        c.width = 2048;
+        c.height = 2048;
+        const ctx = c.getContext('2d');
+
+        const cx = 1024;
+        const cy = 1024;
+        const maxR = 1024;
+
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+
+        // Core (0% to 15% radius): Pure blinding white (#ffffff at opacity 1.0)
+        grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+        grad.addColorStop(0.10, 'rgba(255, 255, 255, 1.0)');
+        grad.addColorStop(0.15, 'rgba(255, 255, 255, 1.0)');
+
+        // Photosphere (15% to 50% radius): Bright yellow-orange (#ffaa22 transitioning with exponential curve Math.pow(1 - r, 2) to simulate limb darkening)
+        const photoSteps = 16;
+        for (let i = 1; i <= photoSteps; i++) {
+          const t = i / photoSteps;
+          const r = 0.15 + t * 0.35;
+          const f = Math.pow(1.0 - t, 2.0);
+          const g = Math.round(170 + (255 - 170) * f);
+          const b = Math.round(34 + (255 - 34) * Math.pow(f, 1.5));
+          const a = 1.0 - 0.25 * (1.0 - f);
+          grad.addColorStop(Number(r.toFixed(4)), `rgba(255, ${g}, ${b}, ${a.toFixed(3)})`);
+        }
+
+        // Corona (50% to 100% radius): Deep solar red-orange fading smoothly to absolute zero opacity rgba(255, 60, 0, 0)
+        const coronaSteps = 20;
+        for (let j = 1; j <= coronaSteps; j++) {
+          const u = j / coronaSteps;
+          const r = 0.50 + u * 0.50;
+          const falloff = Math.pow(1.0 - u, 2.5);
+          const g = Math.round(60 + (170 - 60) * (1.0 - u));
+          const a = 0.75 * falloff;
+          grad.addColorStop(Number(r.toFixed(4)), `rgba(255, ${g}, 0, ${a.toFixed(4)})`);
+        }
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 2048, 2048);
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.needsUpdate = true;
+        return tex;
+      }
+
+      const sunTexture = createSunCanvasTexture();
+      const sunGeo = new THREE.PlaneGeometry(2400, 2400);
+      const sunMat = new THREE.MeshBasicMaterial({
+        map: sunTexture,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        depthTest: true,
+        side: THREE.DoubleSide
       });
-      const sunMesh = new THREE.Mesh(sunCoreGeo, sunCoreMat);
+      const sunMesh = new THREE.Mesh(sunGeo, sunMat);
       sunMesh.position.copy(sunPosition);
-      sunMesh.renderOrder = 0;
       scene.add(sunMesh);
 
-      // 2. Primary solar directional light anchored at the exact Sun world position
+      // Primary solar directional light anchored at the exact Sun world position
       const sunLight = new THREE.DirectionalLight(0xffffff, 4.2);
       sunLight.position.copy(sunMesh.position);
       sunLight.target.position.set(0, 0, 0);
@@ -1075,44 +1126,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.015);
       scene.add(ambientLight);
-
-      // 3. Solar corona glow sprite with AdditiveBlending over solid core
-      function createSunCanvasTexture() {
-        const c = document.createElement('canvas');
-        c.width = 512;
-        c.height = 512;
-        const ctx = c.getContext('2d');
-
-        const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
-        grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
-        grad.addColorStop(0.10, 'rgba(255, 250, 220, 0.98)');
-        grad.addColorStop(0.25, 'rgba(255, 195, 60, 0.8)');
-        grad.addColorStop(0.50, 'rgba(255, 110, 20, 0.35)');
-        grad.addColorStop(0.75, 'rgba(255, 45, 10, 0.12)');
-        grad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
-
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 512, 512);
-
-        const tex = new THREE.CanvasTexture(c);
-        tex.needsUpdate = true;
-        return tex;
-      }
-
-      const sunTexture = createSunCanvasTexture();
-      const sunMaterial = new THREE.SpriteMaterial({
-        map: sunTexture,
-        color: 0xffffff,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        depthTest: true
-      });
-      const sunSprite = new THREE.Sprite(sunMaterial);
-      sunSprite.position.copy(sunPosition);
-      sunSprite.scale.set(1600, 1600, 1);
-      sunSprite.renderOrder = 1;
-      scene.add(sunSprite);
 
       // Skysphere and starfield
       const textureLoader = new THREE.TextureLoader();
@@ -1895,7 +1908,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
         sunLight.target.position.set(0, 0, 0);
         sunLight.target.updateMatrixWorld();
 
-        sunSprite.position.copy(currentSunPos);
+        // Billboard unified Sun mesh to face camera continuously
+        sunMesh.lookAt(camera.position);
 
         const currentSunDir = currentSunPos.clone().normalize();
         if (earthShaderUniforms && earthShaderUniforms.uSunDir) {
