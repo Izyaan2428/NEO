@@ -1057,10 +1057,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
       sunGroup.position.copy(sunPosition);
       scene.add(sunGroup);
 
-      // 2. PART A: THE SOLID OCCLUDER CORE (Blocks background space)
+      // 2. PART A: THE SOLID OCCLUDER CORE (Blinding white emissive core)
       const coreGeo = new THREE.SphereGeometry(120, 32, 32);
-      const coreMat = new THREE.MeshBasicMaterial({
+      const coreMat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 3.0,
+        roughness: 0.2,
         depthWrite: true,
         depthTest: true
       });
