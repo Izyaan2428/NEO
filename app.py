@@ -254,6 +254,52 @@ iframe {
     display: block !important;
     z-index: 1 !important;
 }
+
+@media (max-width: 768px) {
+    [data-testid="stSidebar"] {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    [data-testid="stSidebar"] h1 { font-size: 18px !important; }
+    [data-testid="stSidebar"] h2 { font-size: 15px !important; }
+    [data-testid="stSidebar"] h3 { font-size: 13px !important; }
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span { font-size: 11px !important; }
+    [data-testid="stSidebar"] button { font-size: 11px !important; padding: 8px 12px !important; }
+
+    [data-testid="stExpandSidebarButton"],
+    [data-testid="collapsedControl"],
+    section[data-testid="collapsedControl"],
+    [data-testid="stSidebarTrigger"] {
+        top: 10px !important;
+        left: 10px !important;
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    #top-nav {
+        flex-wrap: wrap !important;
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+    #top-nav * {
+        font-size: 12px !important;
+    }
+
+    #telemetry-drawer {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    #telemetry-drawer h1 { font-size: 16px !important; }
+    #telemetry-drawer h2 { font-size: 14px !important; }
+    #telemetry-drawer h3 { font-size: 12px !important; }
+    #telemetry-drawer p { font-size: 11px !important; }
+    #telemetry-drawer .telemetry-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+}
 </style>
 """
 st.markdown(FULLSCREEN_OVERRIDE_CSS, unsafe_allow_html=True)
@@ -534,64 +580,6 @@ CINEMATIC_THREEJS_TEMPLATE = """
       pointer-events: none;
     }
 
-    @media (max-width: 768px) {
-      #brand-badge { display: none !important; }
-      #nav-help { display: none !important; }
-
-      #top-nav {
-        flex-direction: column;
-        flex-wrap: wrap;
-        font-size: 12px !important;
-        padding: 6px 14px !important;
-        gap: 4px !important;
-        top: 8px !important;
-        max-width: 92vw !important;
-        pointer-events: none !important;
-      }
-      #top-nav span,
-      #top-nav div,
-      .brand-title,
-      .nav-meta {
-        font-size: 12px !important;
-      }
-      #top-nav .nav-sep {
-        display: none !important;
-      }
-
-      #telemetry-drawer {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        right: -100vw;
-        backdrop-filter: blur(30px) !important;
-        -webkit-backdrop-filter: blur(30px) !important;
-        background: rgba(10, 15, 30, 0.92) !important;
-        padding: 20px 16px !important;
-        border-left: none !important;
-      }
-
-      #reset-control {
-        bottom: 16px !important;
-        left: 16px !important;
-        padding: 8px 14px !important;
-        font-size: 11px !important;
-        pointer-events: auto !important;
-      }
-
-      #hud-sidebar-toggle {
-        bottom: 16px !important;
-        left: 155px !important;
-        padding: 8px 12px !important;
-        font-size: 11px !important;
-        pointer-events: auto !important;
-      }
-
-      #targeting-reticle {
-        width: 150px !important;
-        height: 150px !important;
-        pointer-events: none !important;
-      }
-    }
-
     #telemetry-drawer {
       position: absolute;
       top: 0;
@@ -837,6 +825,93 @@ CINEMATIC_THREEJS_TEMPLATE = """
     @keyframes counter-spin-reticle {
       from { transform: rotate(360deg); }
       to { transform: rotate(0deg); }
+    }
+
+    @media (max-width: 768px) {
+      #brand-badge { display: none !important; }
+      #nav-help { display: none !important; }
+
+      /* Top Navigation Pill */
+      #top-nav {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        gap: 6px !important;
+        top: 8px !important;
+        max-width: 94vw !important;
+        pointer-events: none !important;
+      }
+      #top-nav span,
+      #top-nav div,
+      .brand-title,
+      .nav-meta {
+        font-size: 12px !important;
+      }
+      #top-nav .nav-sep {
+        font-size: 10px !important;
+        margin: 0 1px !important;
+      }
+
+      /* Telemetry Drawer full width */
+      #telemetry-drawer {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        right: -100vw;
+        backdrop-filter: blur(28px) !important;
+        -webkit-backdrop-filter: blur(28px) !important;
+        background: rgba(10, 15, 30, 0.95) !important;
+        padding: 20px 16px !important;
+        border-left: none !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Mobile typography scaling: >= 30% reduction to prevent text overflow */
+      #telemetry-drawer h1 { font-size: 16px !important; }
+      #telemetry-drawer h2 { font-size: 14px !important; }
+      #telemetry-drawer h3 { font-size: 12px !important; }
+      #telemetry-drawer p { font-size: 11px !important; }
+      #telemetry-drawer .target-tag { font-size: 8px !important; letter-spacing: 1.5px !important; }
+      #telemetry-drawer .target-name { font-size: 16px !important; margin-bottom: 8px !important; }
+      #telemetry-drawer .threat-pill { font-size: 9.5px !important; padding: 4px 8px !important; margin-bottom: 16px !important; }
+      #telemetry-drawer .scale-card { padding: 12px !important; margin-bottom: 16px !important; }
+      #telemetry-drawer .scale-card-title { font-size: 8.5px !important; }
+      #telemetry-drawer .scale-analogy-text { font-size: 11px !important; margin-bottom: 6px !important; }
+      #telemetry-drawer .silhouette-canvas { height: 50px !important; }
+      #telemetry-drawer .telemetry-label { font-size: 9.5px !important; letter-spacing: 0.3px !important; }
+      #telemetry-drawer .telemetry-value { font-size: 11.5px !important; }
+
+      /* Data Readouts single column flex layout */
+      .telemetry-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 6px 0 !important;
+        gap: 2px !important;
+      }
+
+      #reset-control {
+        bottom: 16px !important;
+        left: 16px !important;
+        padding: 8px 14px !important;
+        font-size: 11px !important;
+        pointer-events: auto !important;
+      }
+
+      #hud-sidebar-toggle {
+        bottom: 16px !important;
+        left: 155px !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        pointer-events: auto !important;
+      }
+
+      #targeting-reticle {
+        width: 130px !important;
+        height: 130px !important;
+        pointer-events: none !important;
+      }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1447,8 +1522,54 @@ CINEMATIC_THREEJS_TEMPLATE = """
         }
       });
 
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      function onDocumentTouchEnd(event) {
+        if (!event.changedTouches || event.changedTouches.length === 0) return;
+        const touch = event.changedTouches[0];
+
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        if (Math.hypot(deltaX, deltaY) > 12) return;
+
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (targetEl && (targetEl.closest('#telemetry-drawer') || targetEl.closest('#reset-control') || targetEl.closest('#hud-sidebar-toggle') || targetEl.closest('#brand-badge') || targetEl.closest('#top-nav'))) {
+          return;
+        }
+
+        mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+        stopAutoPilot();
+
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObjects(interactiveObjects);
+
+        if (hits.length > 0) {
+          const hitObj = hits[0].object;
+          if (hitObj.userData.isStation) {
+            flyToStation(hitObj);
+          } else {
+            flyToAsteroid(hitObj);
+          }
+        }
+      }
+
+      window.addEventListener('touchend', onDocumentTouchEnd, { passive: false });
+
       window.addEventListener('click', (e) => {
-        if (e.target.closest('#telemetry-drawer') || e.target.closest('#reset-control')) return;
+        if (e.target.closest('#telemetry-drawer') || e.target.closest('#reset-control') || e.target.closest('#hud-sidebar-toggle') || e.target.closest('#brand-badge')) return;
+
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
         stopAutoPilot();
 
