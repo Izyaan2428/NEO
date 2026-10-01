@@ -47,9 +47,27 @@ FULLSCREEN_OVERRIDE_CSS = """
 
 [data-testid="stHeader"] {
     background: transparent !important;
-    color: #ffffff !important;
-    z-index: 101 !important;
-    pointer-events: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: 0px !important;
+    min-height: 0px !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+}
+
+header {
+    background: transparent !important;
+    display: none !important;
+}
+
+header:has([data-testid="collapsedControl"]),
+header:has([data-testid="stSidebarTrigger"]) {
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    height: 0px !important;
+    min-height: 0px !important;
+    overflow: visible !important;
 }
 
 [data-testid="stSidebar"] {
@@ -278,8 +296,9 @@ iframe {
     [data-testid="collapsedControl"],
     section[data-testid="collapsedControl"],
     [data-testid="stSidebarTrigger"] {
-        top: 10px !important;
-        left: 10px !important;
+        top: 12px !important;
+        top: max(12px, env(safe-area-inset-top, 12px)) !important;
+        left: 12px !important;
         width: 48px !important;
         height: 48px !important;
         min-width: 48px !important;
@@ -289,6 +308,8 @@ iframe {
     }
 
     [data-testid="stSidebarCollapseButton"] {
+        top: 12px !important;
+        top: max(12px, env(safe-area-inset-top, 12px)) !important;
         width: 48px !important;
         height: 48px !important;
         min-width: 48px !important;
@@ -299,11 +320,13 @@ iframe {
 
     #top-nav {
         flex-wrap: wrap !important;
-        padding: 6px 10px !important;
-        font-size: 12px !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        top: 12px !important;
+        top: max(12px, env(safe-area-inset-top, 12px)) !important;
     }
     #top-nav * {
-        font-size: 12px !important;
+        font-size: 11px !important;
     }
 
     #telemetry-drawer {
@@ -312,14 +335,23 @@ iframe {
         bottom: 0 !important;
         right: 0 !important;
         border-radius: 16px 16px 0 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
     #telemetry-drawer h1 { font-size: 16px !important; }
     #telemetry-drawer h2 { font-size: 14px !important; }
     #telemetry-drawer h3 { font-size: 12px !important; }
     #telemetry-drawer p { font-size: 11px !important; }
+    #telemetry-drawer .scale-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
     #telemetry-drawer .telemetry-row {
+        display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
+        width: 100% !important;
     }
 }
 </style>
@@ -875,14 +907,18 @@ CINEMATIC_THREEJS_TEMPLATE = """
         flex-direction: row !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
-        padding: 6px 12px !important;
-        font-size: 12px !important;
+        align-items: center !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
         gap: 6px !important;
-        top: 8px !important;
+        top: 12px !important;
+        top: max(12px, env(safe-area-inset-top, 12px)) !important;
         width: 92vw !important;
         max-width: 92vw !important;
         box-sizing: border-box !important;
         pointer-events: none !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
       }
       #top-nav span,
       #top-nav div,
@@ -895,7 +931,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         margin: 0 1px !important;
       }
 
-      /* Telemetry Drawer: fluid responsive bottom sheet modal */
+      /* Telemetry Drawer: fluid responsive bottom sheet modal with single-column vertical stacking */
       #telemetry-drawer {
         width: 100vw !important;
         max-width: 100vw !important;
@@ -922,6 +958,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
         z-index: 100000 !important;
+        display: flex !important;
+        flex-direction: column !important;
       }
 
       #telemetry-drawer.open,
@@ -940,18 +978,29 @@ CINEMATIC_THREEJS_TEMPLATE = """
       #telemetry-drawer .target-tag { font-size: 8px !important; letter-spacing: 1.5px !important; }
       #telemetry-drawer .target-name { font-size: 18px !important; margin-bottom: 8px !important; }
       #telemetry-drawer .threat-pill { font-size: 9.5px !important; padding: 4px 8px !important; margin-bottom: 14px !important; }
-      #telemetry-drawer .scale-card { padding: 12px !important; margin-bottom: 14px !important; }
+      
+      /* Single-column vertical stacking across all telemetry cards */
+      #telemetry-drawer .scale-card {
+        padding: 12px !important;
+        margin-bottom: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
       #telemetry-drawer .scale-card-title { font-size: 8.5px !important; }
       #telemetry-drawer .scale-analogy-text { font-size: 11px !important; margin-bottom: 6px !important; }
-      #telemetry-drawer .silhouette-canvas { height: 50px !important; }
-      #telemetry-drawer .telemetry-label { font-size: 9.5px !important; letter-spacing: 0.3px !important; }
-      #telemetry-drawer .telemetry-value { font-size: 11.5px !important; }
+      #telemetry-drawer .silhouette-canvas { height: 50px !important; width: 100% !important; }
+      #telemetry-drawer .telemetry-label { font-size: 9.5px !important; letter-spacing: 0.3px !important; width: 100% !important; text-align: left !important; }
+      #telemetry-drawer .telemetry-value { font-size: 11.5px !important; width: 100% !important; text-align: left !important; }
 
       /* Data Readouts single column flex layout */
       .telemetry-row {
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         padding: 6px 0 !important;
         gap: 2px !important;
       }
@@ -969,10 +1018,15 @@ CINEMATIC_THREEJS_TEMPLATE = """
         font-size: 26px !important;
         pointer-events: auto !important;
         z-index: 1000000 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
 
       #reset-control {
         bottom: 16px !important;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
         left: 14px !important;
         min-width: 48px !important;
         min-height: 48px !important;
@@ -987,6 +1041,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
       #hud-sidebar-toggle {
         bottom: 16px !important;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
         left: 160px !important;
         min-width: 48px !important;
         min-height: 48px !important;
@@ -1675,26 +1730,12 @@ CINEMATIC_THREEJS_TEMPLATE = """
         }
       });
 
-      let touchStartX = 0;
-      let touchStartY = 0;
-
-      renderer.domElement.addEventListener('touchstart', (e) => {
-        if (e.touches && e.touches.length > 0) {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-
-      renderer.domElement.addEventListener('touchend', (e) => {
-        if (e.changedTouches.length === 0) return;
+      renderer.domElement.addEventListener('touchend', function(e) {
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
         const touch = e.changedTouches[0];
-
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
-        if (Math.hypot(deltaX, deltaY) > 15) return;
-
-        // Correct normalized device coordinate (NDC) calculation accounting for mobile padding/margins
         const rect = renderer.domElement.getBoundingClientRect();
+
+        // Calculate precise normalized device coordinates for mobile touch
         mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
 
