@@ -318,8 +318,12 @@ iframe {
         pointer-events: auto !important;
     }
 
-    #top-nav {
+    #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        max-width: 100vw !important;
         padding: 8px 12px !important;
         font-size: 11px !important;
         top: 12px !important;
@@ -327,6 +331,14 @@ iframe {
     }
     #top-nav * {
         font-size: 11px !important;
+    }
+
+    .bottom-controls-container, .hud-controls-bar {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     #telemetry-drawer {
@@ -352,6 +364,26 @@ iframe {
         flex-direction: column !important;
         align-items: flex-start !important;
         width: 100% !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    #brand-badge, #nav-help {
+        display: none !important;
+    }
+    #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        max-width: 100vw !important;
+    }
+    .bottom-controls-container, .hud-controls-bar {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 }
 </style>
@@ -514,7 +546,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       border-radius: 9999px;
     }
 
-    #top-nav {
+    #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
       position: absolute;
       top: 20px;
       left: 50%;
@@ -528,8 +560,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
       letter-spacing: 0.5px;
       max-width: 90vw;
       box-sizing: border-box;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
       pointer-events: none;
     }
     #top-nav * {
@@ -587,11 +619,22 @@ CINEMATIC_THREEJS_TEMPLATE = """
       margin-bottom: 2px;
     }
 
-    #reset-control {
+    .bottom-controls-container, .hud-controls-bar {
       position: absolute;
       bottom: 28px;
       left: 28px;
       z-index: 10;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      align-items: center !important;
+      justify-content: center !important;
+      pointer-events: none;
+    }
+
+    #reset-control {
+      position: relative;
       padding: 10px 20px;
       display: flex;
       align-items: center;
@@ -603,6 +646,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       color: rgba(255, 255, 255, 0.9);
       transition: all 0.25s ease;
       pointer-events: auto !important;
+      white-space: nowrap !important;
     }
     #reset-control:hover {
       background: rgba(30, 36, 52, 0.85);
@@ -612,10 +656,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
     }
 
     #hud-sidebar-toggle {
-      position: absolute;
-      bottom: 28px;
-      left: 195px;
-      z-index: 10;
+      position: relative;
       padding: 10px 18px;
       display: flex;
       align-items: center;
@@ -629,6 +670,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       pointer-events: auto !important;
       transition: all 0.25s ease;
       user-select: none;
+      white-space: nowrap !important;
     }
     #hud-sidebar-toggle:hover {
       background: rgba(0, 240, 255, 0.25);
@@ -898,6 +940,28 @@ CINEMATIC_THREEJS_TEMPLATE = """
       to { transform: rotate(0deg); }
     }
 
+    @media (max-width: 1024px) {
+      #brand-badge, #nav-help {
+        display: none !important;
+      }
+      #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        max-width: 96vw !important;
+      }
+      .bottom-controls-container, .hud-controls-bar {
+        bottom: 20px !important;
+        left: 20px !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+      }
+    }
+
     @media (max-width: 768px) {
       #brand-badge { display: none !important; }
       #nav-help { display: none !important; }
@@ -1024,25 +1088,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
         justify-content: center !important;
       }
 
-      #reset-control {
+      .bottom-controls-container, .hud-controls-bar {
         bottom: 16px !important;
         bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
         left: 14px !important;
-        min-width: 48px !important;
-        min-height: 48px !important;
-        padding: 10px 14px !important;
-        font-size: 11px !important;
-        pointer-events: auto !important;
-        z-index: 1000000 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
       }
 
-      #hud-sidebar-toggle {
-        bottom: 16px !important;
-        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
-        left: 160px !important;
+      #reset-control, #hud-sidebar-toggle {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
         min-width: 48px !important;
         min-height: 48px !important;
         padding: 10px 14px !important;
@@ -1068,7 +1126,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
 <body>
   <div id="canvas-container"></div>
 
-  <div id="top-nav" class="glass-pill">
+  <div id="top-nav" class="glass-pill top-nav-container">
     <div class="status-beacon"></div>
     <span class="brand-title">NASA EYES ON ASTEROIDS</span>
     <span class="nav-sep">•</span>
@@ -1083,14 +1141,16 @@ CINEMATIC_THREEJS_TEMPLATE = """
     DEEP SPACE TRAJECTORY VISUALIZER
   </div>
 
-  <div id="reset-control" class="glass-pill" onclick="resetToEarthView()">
-    <span>🌍</span>
-    <span>RESET VIEW (ESC)</span>
-  </div>
+  <div class="bottom-controls-container hud-controls-bar" id="bottom-controls">
+    <div id="reset-control" class="glass-pill" onclick="resetToEarthView()">
+      <span>🌍</span>
+      <span>RESET VIEW (ESC)</span>
+    </div>
 
-  <div id="hud-sidebar-toggle" class="glass-pill" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
-    <span>☰</span>
-    <span>CONTROLS</span>
+    <div id="hud-sidebar-toggle" class="glass-pill" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
+      <span>☰</span>
+      <span>CONTROLS</span>
+    </div>
   </div>
 
   <div id="nav-help">
@@ -1206,11 +1266,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
 
       // 2. PART A: THE SOLID OCCLUDER CORE (Blinding white emissive core)
       const coreGeo = new THREE.SphereGeometry(120, 32, 32);
-      const coreMat = new THREE.MeshStandardMaterial({
+      const coreMat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         emissive: 0xffffff,
-        emissiveIntensity: 3.0,
-        roughness: 0.2,
+        emissiveIntensity: 2.5,
         depthWrite: true,
         depthTest: true
       });
