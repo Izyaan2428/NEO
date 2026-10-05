@@ -251,58 +251,90 @@ function createLandmarkHologram(asteroidDiameterMeters, geoSize) {
   // Build THREE.LineSegments
   const landmarkGeo = new THREE.BufferGeometry().setFromPoints(pts);
   const landmarkLines = new THREE.LineSegments(landmarkGeo, hologramMaterial);
+  landmarkLines.position.y = -landmarkHeight * 0.5;
 
-  // Interactive scale comparison label sprite
+  const wireframeSubGroup = new THREE.Group();
+  wireframeSubGroup.add(landmarkLines);
+
+  // Scale relative to asteroid visual radius:
+  const gSize = geoSize || 1.2;
+  const scaleFactor = (gSize * 2.0) / Math.max(1, diam);
+  wireframeSubGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  hologramGroup.add(wireframeSubGroup);
+
+  // Landmark visual metrics in hologramGroup coordinates (unscaled)
+  const landmarkVisualHeight = landmarkHeight * scaleFactor;
+  const landmarkVisualWidth = (landmarkWidth + 36) * scaleFactor;
+  const visualTop = landmarkVisualHeight * 0.5;
+
+  // Interactive high-resolution scale comparison label billboard
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
-  canvas.height = 320;
+  canvas.height = 384;
   const ctx = canvas.getContext('2d');
 
-  // Cyber container background
-  ctx.fillStyle = 'rgba(6, 12, 24, 0.92)';
+  // Glowing cyber container background
+  const bgGrad = ctx.createLinearGradient(0, 0, 1024, 384);
+  bgGrad.addColorStop(0, 'rgba(4, 12, 28, 0.95)');
+  bgGrad.addColorStop(1, 'rgba(8, 22, 44, 0.92)');
+  ctx.fillStyle = bgGrad;
   ctx.strokeStyle = '#00f3ff';
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;
+
   if (ctx.roundRect) {
     ctx.beginPath();
-    ctx.roundRect(4, 4, 1016, 312, 16);
+    ctx.roundRect(6, 6, 1012, 372, 18);
     ctx.fill();
     ctx.stroke();
   } else {
-    ctx.fillRect(4, 4, 1016, 312);
-    ctx.strokeRect(4, 4, 1016, 312);
+    ctx.fillRect(6, 6, 1012, 372);
+    ctx.strokeRect(6, 6, 1012, 372);
   }
 
-  // Cyber corner accents
+  // Cyber corner accents (bold cyan)
   ctx.fillStyle = '#00f3ff';
-  ctx.fillRect(4, 4, 24, 6);
-  ctx.fillRect(4, 4, 6, 24);
-  ctx.fillRect(996, 4, 24, 6);
-  ctx.fillRect(1014, 4, 6, 24);
-  ctx.fillRect(4, 310, 24, 6);
-  ctx.fillRect(4, 292, 6, 24);
-  ctx.fillRect(996, 310, 24, 6);
-  ctx.fillRect(1014, 292, 6, 24);
+  ctx.fillRect(6, 6, 36, 8);
+  ctx.fillRect(6, 6, 8, 36);
+  ctx.fillRect(982, 6, 36, 8);
+  ctx.fillRect(1010, 6, 8, 36);
+  ctx.fillRect(6, 370, 36, 8);
+  ctx.fillRect(6, 342, 8, 36);
+  ctx.fillRect(982, 370, 36, 8);
+  ctx.fillRect(1010, 342, 8, 36);
 
-  // Header tag
-  ctx.font = 'bold 24px monospace';
+  // Subdued divider line
+  ctx.strokeStyle = 'rgba(0, 243, 255, 0.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(32, 74);
+  ctx.lineTo(992, 74);
+  ctx.stroke();
+
+  // Header tag (bold cyan, >= 24px)
+  ctx.font = 'bold 26px monospace';
   ctx.fillStyle = '#00f3ff';
-  ctx.fillText("HOLOGRAPHIC SCALE COMPARISON", 36, 48);
+  ctx.fillText("⌖ HOLOGRAPHIC SCALE COMPARISON", 36, 50);
 
-  // Landmark name
-  ctx.font = 'bold 44px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  // Landmark name & dimension (crisp 48px bold white)
+  ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(`${landmarkName} (${landmarkDim})`, 36, 114);
+  ctx.fillText(`${landmarkName} (${landmarkDim})`, 36, 136);
 
-  // Comparison line
+  // Asteroid comparison (bold 36px yellow-orange)
   ctx.font = 'bold 36px monospace';
   ctx.fillStyle = '#ffaa00';
-  ctx.fillText(`vs Asteroid (${Math.round(diam)}m)`, 36, 175);
+  ctx.fillText(`vs Asteroid (${Math.round(diam)}m)`, 36, 206);
 
-  // Ratio readout
+  // Ratio readout (bold 32px cyan)
   const ratio = (diam / landmarkHeight).toFixed(2);
-  ctx.font = '28px monospace';
+  ctx.font = 'bold 32px monospace';
   ctx.fillStyle = '#00f3ff';
-  ctx.fillText(`Asteroid is ${ratio}x Landmark size`, 36, 235);
+  ctx.fillText(`Asteroid is ${ratio}x Landmark size`, 36, 276);
+
+  // Subtitle note (crisp 24px white)
+  ctx.font = '24px monospace';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+  ctx.fillText(`1:1 Physical Scale Proportionality`, 36, 340);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.minFilter = THREE.LinearFilter;
@@ -315,24 +347,24 @@ function createLandmarkHologram(asteroidDiameterMeters, geoSize) {
   });
   const labelSprite = new THREE.Sprite(spriteMat);
 
-  const labelH = Math.max(35, landmarkHeight * 0.22);
-  const labelW = labelH * (1024 / 320);
-  labelSprite.scale.set(labelW, labelH, 1.0);
-  labelSprite.position.set(xBrk - (labelW * 0.5) - 14, 0, 0);
+  // Card dimensions in unscaled world units, scaled comfortably to inspection zoom
+  const cardHeightWorld = Math.max(1.15, Math.min(2.0, gSize * 0.9));
+  const cardWidthWorld = cardHeightWorld * (1024 / 384);
+  labelSprite.scale.set(cardWidthWorld, cardHeightWorld, 1.0);
 
-  // Assemble subGroup centered at origin
-  const subGroup = new THREE.Group();
-  landmarkLines.position.y = -landmarkHeight * 0.5;
-  labelSprite.position.y = 0;
-  subGroup.add(landmarkLines);
-  subGroup.add(labelSprite);
+  // Position clearly ABOVE the landmark wireframe so it never overlaps the 3D asteroid geometry
+  const cardY = visualTop + (cardHeightWorld * 0.55) + 0.35;
+  labelSprite.position.set(0, cardY, 0);
+  hologramGroup.add(labelSprite);
 
-  // Scale relative to asteroid visual radius:
-  const gSize = geoSize || 1.2;
-  const scaleFactor = (gSize * 2.0) / Math.max(1, diam);
-  subGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  // Store bounding dimensions on hologramGroup for safe clearance docking
+  const totalHalfWidth = Math.max(landmarkVisualWidth * 0.5 + 0.3, cardWidthWorld * 0.5);
+  hologramGroup.userData = {
+    visualHalfWidth: totalHalfWidth,
+    visualHeight: (visualTop + cardHeightWorld + 0.5) * 2.0,
+    gSize: gSize
+  };
 
-  hologramGroup.add(subGroup);
   return hologramGroup;
 }
 

@@ -117,7 +117,9 @@ function flyToAsteroid(obj) {
   const controls = _interactionControls;
 
   const astPos = group.position.clone();
-  const viewOffset = astPos.clone().normalize().multiplyScalar(4.5).add(new THREE.Vector3(0, 1.8, 0));
+  const gSize = (data && data.geoSize) ? data.geoSize : 1.2;
+  const camDist = Math.max(5.6, gSize * 3.4 + 1.8);
+  const viewOffset = astPos.clone().normalize().multiplyScalar(camDist).add(new THREE.Vector3(0, camDist * 0.32, 0));
   const targetCamPos = astPos.clone().add(viewOffset);
 
   if (camera && controls) {

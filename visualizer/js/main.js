@@ -130,10 +130,16 @@ try {
 
       // Holographic Scale Landmark Tracking & Flicker Animation
       if (typeof hologramGroup !== 'undefined' && hologramGroup && hologramGroup.visible) {
-        const rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
+        // Dock to open left side of viewport to clear right-hand telemetry drawer
+        const leftDir = new THREE.Vector3(-1, 0, 0).applyQuaternion(camera.quaternion).normalize();
         const gSize = (selectedMesh.userData && selectedMesh.userData.geoSize) ? selectedMesh.userData.geoSize : 1.5;
-        const offsetDist = gSize * 2.8 + 1.2;
-        hologramGroup.position.copy(selectedMesh.position).addScaledVector(rightVec, offsetDist);
+        const halfWidth = (hologramGroup.userData && hologramGroup.userData.visualHalfWidth) 
+          ? hologramGroup.userData.visualHalfWidth 
+          : (gSize * 1.5);
+        
+        // Generous clearance ensuring landmark and billboard stay completely clear of asteroid and drawer
+        const safeDistance = gSize * 1.6 + halfWidth + 0.6;
+        hologramGroup.position.copy(selectedMesh.position).addScaledVector(leftDir, safeDistance);
         hologramGroup.quaternion.copy(camera.quaternion);
 
         if (window.hologramMaterial) {
