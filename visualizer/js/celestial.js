@@ -82,16 +82,16 @@ function initCelestial(scene, textureLoader) {
   sunGroup.position.copy(sunPosition);
   scene.add(sunGroup);
 
-  // 2. PART A: THE SOLID OCCLUDER CORE (Blinding white emissive core)
+  // 2. PART A: THE SOLID OCCLUDER CORE (Blinding white core)
   const coreGeo = new THREE.SphereGeometry(120, 32, 32);
   const coreMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    emissive: 0xffffff,
-    emissiveIntensity: 2.5,
+    toneMapped: false,
     depthWrite: true,
     depthTest: true
   });
   sunCore = new THREE.Mesh(coreGeo, coreMat);
+  sunCore.renderOrder = 0;
   sunGroup.add(sunCore);
 
   // 3. PART B: THE PROCEDURAL GLOW CORONA (Additive Atmosphere)
@@ -106,6 +106,7 @@ function initCelestial(scene, textureLoader) {
     side: THREE.DoubleSide
   });
   sunCorona = new THREE.Mesh(coronaGeo, coronaMat);
+  sunCorona.renderOrder = 1;
   sunGroup.add(sunCorona);
 
   // Primary solar directional light anchored at the exact Sun world position
