@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>NASA Eyes on Asteroids</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: hidden !important;
+      background: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    #canvas-container {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: hidden !important;
+      z-index: 1;
+      background: #000000;
+      touch-action: none;
+    }
+
+    #canvas-container canvas {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      display: block !important;
+    }
+
+    .glass-pill {
+      background: rgba(18, 22, 32, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 0 12px rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+    }
+
+    #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      max-width: 90vw;
+      box-sizing: border-box;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      pointer-events: none;
+    }
+    #top-nav * {
+      pointer-events: none;
+    }
+    .status-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 10px #00ff88;
+      animation: pulse-beacon 2s infinite;
+    }
+    @keyframes pulse-beacon {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.4; }
+    }
+    .brand-title {
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+    .nav-sep {
+      color: rgba(255, 255, 255, 0.25);
+    }
+    .nav-meta {
+      color: rgba(255, 255, 255, 0.85);
+      font-variant-numeric: tabular-nums;
+    }
+
+    #brand-badge {
+      position: absolute;
+      top: 18px;
+      left: 70px;
+      z-index: 10;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      pointer-events: auto !important;
+      user-select: none;
+      transition: all 0.25s ease;
+    }
+    #brand-badge:hover strong {
+      color: #ffffff;
+      text-shadow: 0 0 10px #00f0ff;
+    }
+    #brand-badge strong {
+      color: #00f0ff;
+      display: block;
+      font-size: 13px;
+      letter-spacing: 2.5px;
+      margin-bottom: 2px;
+    }
+
+    .bottom-controls-container, .hud-controls-bar {
+      position: absolute;
+      bottom: 28px;
+      left: 28px;
+      z-index: 10;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      align-items: center !important;
+      justify-content: center !important;
+      pointer-events: none;
+    }
+
+    #reset-control {
+      position: relative;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.25s ease;
+      pointer-events: auto !important;
+      white-space: nowrap !important;
+    }
+    #reset-control:hover {
+      background: rgba(30, 36, 52, 0.85);
+      border-color: rgba(0, 240, 255, 0.5);
+      color: #00f0ff;
+      transform: translateY(-2px);
+    }
+
+    #hud-sidebar-toggle {
+      position: relative;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.25s ease;
+      user-select: none;
+      white-space: nowrap !important;
+    }
+    #hud-sidebar-toggle:hover {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      transform: translateY(-2px);
+    }
+
+    #nav-help {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+
+    #telemetry-drawer {
+      position: absolute;
+      top: 0;
+      right: -450px;
+      width: 350px;
+      max-width: 90vw;
+      height: 100vh;
+      transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(10, 15, 30, 0.75);
+      border-left: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.75);
+      z-index: 100;
+      padding: 24px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
+    #telemetry-drawer .close-btn, #telemetry-drawer button { pointer-events: auto !important; cursor: pointer !important; z-index: 1000000 !important; position: relative; }
+    .drawer-close {
+      position: absolute !important;
+      top: 20px !important;
+      right: 20px !important;
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      border: 1px solid rgba(0, 240, 255, 0.4) !important;
+      cursor: pointer !important;
+      color: #ffffff !important;
+      font-size: 24px !important;
+      line-height: 1 !important;
+      transition: all 0.2s ease !important;
+      pointer-events: auto !important;
+      z-index: 1000000 !important;
+    }
+    .drawer-close:hover, #telemetry-drawer .close-btn:hover {
+      background: rgba(255, 0, 60, 0.3) !important;
+      border-color: #ff003c !important;
+      color: #ffffff !important;
+    }
+    .target-tag {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #00f0ff;
+      margin-bottom: 6px;
+    }
+    .target-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+    .threat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+      align-self: flex-start;
+    }
+    .threat-safe {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid #00f0ff;
+      color: #00f0ff;
+    }
+    .threat-hazard {
+      background: rgba(255, 0, 60, 0.18);
+      border: 1px solid #ff003c;
+      color: #ff003c;
+      box-shadow: 0 0 15px rgba(255, 0, 60, 0.35);
+    }
+    
+    .scale-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 24px;
+    }
+    .scale-card-title {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+    }
+    .scale-analogy-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    .silhouette-canvas {
+      width: 100%;
+      height: 70px;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      padding-top: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #hologram-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      margin-top: 14px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #00f3ff;
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.25s ease;
+      user-select: none;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.12);
+    }
+    #hologram-toggle:hover {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: #00f3ff;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
+      transform: translateY(-1px);
+    }
+    #hologram-toggle.disabled {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.4);
+      box-shadow: none;
+    }
+    #hologram-toggle .toggle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00f3ff;
+      box-shadow: 0 0 8px #00f3ff;
+      transition: all 0.25s ease;
+      display: inline-block;
+    }
+    #hologram-toggle.disabled .toggle-dot {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+    }
+
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .telemetry-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      letter-spacing: 0.5px;
+    }
+    .telemetry-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #hover-tooltip {
+      position: absolute;
+      display: none;
+      z-index: 15;
+      padding: 6px 12px;
+      background: rgba(10, 14, 22, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      transform: translate(12px, -12px);
+    }
+
+    #targeting-reticle {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 12;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: none;
+    }
+    #targeting-reticle.active {
+      opacity: 0.85;
+      display: block;
+    }
+    @media (max-width: 820px) {
+      #targeting-reticle {
+        width: 170px;
+        height: 170px;
+      }
+    }
+    .reticle-outer-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 240, 255, 0.45);
+      animation: spin-reticle 24s linear infinite;
+      box-sizing: border-box;
+    }
+    .reticle-inner-ring {
+      position: absolute;
+      top: 12.5%;
+      left: 12.5%;
+      width: 75%;
+      height: 75%;
+      border-radius: 50%;
+      border: 1px dotted rgba(0, 240, 255, 0.35);
+      animation: counter-spin-reticle 14s linear infinite;
+      box-sizing: border-box;
+    }
+    .reticle-bracket {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: #00f0ff;
+      border-style: solid;
+      box-sizing: border-box;
+    }
+    .reticle-bracket.tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+    .reticle-bracket.tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+    .reticle-bracket.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+    .reticle-bracket.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+    
+    .reticle-tag {
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #00f0ff;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
+    }
+
+    #targeting-reticle.hazard .reticle-outer-ring {
+      border-color: rgba(255, 0, 60, 0.55);
+    }
+    #targeting-reticle.hazard .reticle-inner-ring {
+      border-color: rgba(255, 0, 60, 0.45);
+    }
+    #targeting-reticle.hazard .reticle-bracket {
+      border-color: #ff003c;
+    }
+    #targeting-reticle.hazard .reticle-tag {
+      color: #ff003c;
+      text-shadow: 0 0 8px rgba(255, 0, 60, 0.7);
+    }
+
+    @keyframes spin-reticle {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes counter-spin-reticle {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @media (max-width: 1024px) {
+      #brand-badge, #nav-help {
+        display: none !important;
+      }
+      #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        max-width: 96vw !important;
+      }
+      .bottom-controls-container, .hud-controls-bar {
+        bottom: 20px !important;
+        left: 20px !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #brand-badge { display: none !important; }
+      #nav-help { display: none !important; }
+
+      /* Top Navigation Pill */
+      #top-nav {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        gap: 6px !important;
+        top: 12px !important;
+        top: max(12px, env(safe-area-inset-top, 12px)) !important;
+        width: 92vw !important;
+        max-width: 92vw !important;
+        box-sizing: border-box !important;
+        pointer-events: none !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+      }
+      #top-nav span,
+      #top-nav div,
+      .brand-title,
+      .nav-meta {
+        font-size: 11px !important;
+      }
+      #top-nav .nav-sep {
+        font-size: 9px !important;
+        margin: 0 1px !important;
+      }
+
+      /* Telemetry Drawer: fluid responsive bottom sheet modal with single-column vertical stacking */
+      #telemetry-drawer {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        top: auto !important;
+        height: auto !important;
+        max-height: 80vh !important;
+        max-height: 80dvh !important;
+        border-radius: 16px 16px 0 0 !important;
+        border-left: none !important;
+        border-top: 1px solid rgba(0, 240, 255, 0.4) !important;
+        backdrop-filter: blur(28px) !important;
+        -webkit-backdrop-filter: blur(28px) !important;
+        background: rgba(10, 15, 30, 0.96) !important;
+        padding: 24px 18px 30px 18px !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85) !important;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+        opacity: 0;
+        pointer-events: none;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        z-index: 100000 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      #telemetry-drawer.open,
+      #telemetry-drawer[style*="right: 0px"],
+      #telemetry-drawer[style*="right:0px"] {
+        transform: translateY(0%) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
+      /* Mobile typography scaling: >= 30% reduction to prevent text overflow */
+      #telemetry-drawer h1 { font-size: 16px !important; }
+      #telemetry-drawer h2 { font-size: 14px !important; }
+      #telemetry-drawer h3 { font-size: 12px !important; }
+      #telemetry-drawer p { font-size: 11px !important; }
+      #telemetry-drawer .target-tag { font-size: 8px !important; letter-spacing: 1.5px !important; }
+      #telemetry-drawer .target-name { font-size: 18px !important; margin-bottom: 8px !important; }
+      #telemetry-drawer .threat-pill { font-size: 9.5px !important; padding: 4px 8px !important; margin-bottom: 14px !important; }
+      
+      /* Single-column vertical stacking across all telemetry cards */
+      #telemetry-drawer .scale-card {
+        padding: 12px !important;
+        margin-bottom: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      #telemetry-drawer .scale-card-title { font-size: 8.5px !important; }
+      #telemetry-drawer .scale-analogy-text { font-size: 11px !important; margin-bottom: 6px !important; }
+      #telemetry-drawer .silhouette-canvas { height: 50px !important; width: 100% !important; }
+      #telemetry-drawer .telemetry-label { font-size: 9.5px !important; letter-spacing: 0.3px !important; width: 100% !important; text-align: left !important; }
+      #telemetry-drawer .telemetry-value { font-size: 11.5px !important; width: 100% !important; text-align: left !important; }
+      #telemetry-drawer #hologram-toggle { padding: 8px 12px !important; font-size: 10px !important; margin-top: 10px !important; }
+
+      /* Data Readouts single column flex layout */
+      .telemetry-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 6px 0 !important;
+        gap: 2px !important;
+      }
+
+      /* Minimum 48px x 48px interactive touch targets */
+      .drawer-close,
+      #telemetry-drawer .close-btn,
+      #telemetry-drawer button {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        top: 14px !important;
+        right: 14px !important;
+        font-size: 26px !important;
+        pointer-events: auto !important;
+        z-index: 1000000 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .bottom-controls-container, .hud-controls-bar {
+        bottom: 16px !important;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+        left: 14px !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+
+      #reset-control, #hud-sidebar-toggle {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        padding: 10px 14px !important;
+        font-size: 11px !important;
+        pointer-events: auto !important;
+        z-index: 1000000 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      #targeting-reticle {
+        width: 120px !important;
+        height: 120px !important;
+        pointer-events: none !important;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="top-nav" class="glass-pill top-nav-container">
+    <div class="status-beacon"></div>
+    <span class="brand-title">NASA EYES ON ASTEROIDS</span>
+    <span class="nav-sep">•</span>
+    <span class="nav-meta">DATE: <span id="display-date">__TARGET_DATE__</span></span>
+    <span class="nav-sep">•</span>
+    <span class="nav-meta"><span id="tracked-count">__TRACKED_COUNT__</span> TRACKED</span>
+    <span id="autopilot-nav-badge" style="display: none; color: #00f0ff; font-weight: 700; font-size: 11px; letter-spacing: 1px; border: 1px solid rgba(0,240,255,0.6); padding: 2px 8px; border-radius: 9999px; background: rgba(0,240,255,0.15);">AUTO-PILOT QA</span>
+  </div>
+
+  <div id="brand-badge" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
+    <strong>NEO SENTINEL</strong>
+    DEEP SPACE TRAJECTORY VISUALIZER
+  </div>
+
+  <div class="bottom-controls-container hud-controls-bar" id="bottom-controls">
+    <div id="reset-control" class="glass-pill" onclick="resetToEarthView()">
+      <span>🌍</span>
+      <span>RESET VIEW (ESC)</span>
+    </div>
+
+    <div id="hud-sidebar-toggle" class="glass-pill" onclick="toggleMissionControls()" title="Click to Toggle Mission Controls Sidebar">
+      <span>☰</span>
+      <span>CONTROLS</span>
+    </div>
+  </div>
+
+  <div id="nav-help">
+    DRAG TO ORBIT // SCROLL TO ZOOM // CLICK ASTEROID TO FLY IN
+  </div>
+
+  <div id="hover-tooltip"></div>
+
+  <div id="targeting-reticle">
+    <div class="reticle-outer-ring"></div>
+    <div class="reticle-inner-ring"></div>
+    <div class="reticle-bracket tl"></div>
+    <div class="reticle-bracket tr"></div>
+    <div class="reticle-bracket bl"></div>
+    <div class="reticle-bracket br"></div>
+    <div class="reticle-tag" id="reticle-status">TARGET LOCK: ACTIVE</div>
+  </div>
+
+  <div id="telemetry-drawer">
+    <button class="drawer-close close-btn" id="drawer-close-btn" onclick="resetToEarthView()" aria-label="Close drawer">×</button>
+    <div class="target-tag">TARGET TELEMETRY</div>
+    <div class="target-name" id="drawer-name">---</div>
+    <div id="drawer-threat" class="threat-pill">---</div>
+
+    <div class="scale-card">
+      <div class="scale-card-title">HUMAN-SCALE PHYSICAL COMPARISON</div>
+      <div class="scale-analogy-text" id="drawer-scale">---</div>
+      <div class="silhouette-canvas" id="drawer-silhouette"></div>
+      <div id="hologram-toggle" class="hologram-toggle-btn" onclick="toggleHologram()" title="Toggle 3D Holographic Landmark Scale in Scene">
+        <span class="toggle-dot"></span>
+        <span class="toggle-label">3D HOLO COMPARISON: ON</span>
+      </div>
+    </div>
+
+    <div class="telemetry-row">
+      <span class="telemetry-label">ESTIMATED DIAMETER</span>
+      <span class="telemetry-value" id="drawer-diameter">---</span>
+    </div>
+    <div class="telemetry-row">
+      <span class="telemetry-label">RELATIVE VELOCITY</span>
+      <span class="telemetry-value" id="drawer-velocity">---</span>
+    </div>
+    <div class="telemetry-row">
+      <span class="telemetry-label">CLOSE APPROACH (MISS DISTANCE)</span>
+      <span class="telemetry-value" id="drawer-distance">---</span>
+    </div>
+    <div class="telemetry-row">
+      <span class="telemetry-label">LUNAR PROXIMITY (LD)</span>
+      <span class="telemetry-value" id="drawer-ld">---</span>
+    </div>
+    <div class="telemetry-row">
+      <span class="telemetry-label">ORBITAL INCLINATION</span>
+      <span class="telemetry-value" id="drawer-inc">---</span>
+    </div>
+  </div>
+
+  <script>
+    /* __NEO_DATA__ */
+    /* __MODULE_SCRIPTS__ */
+  </script>
+</body>
+</html>
