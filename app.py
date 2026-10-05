@@ -318,6 +318,11 @@ iframe {
         pointer-events: auto !important;
     }
 
+    #hologram-toggle {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+
     #top-nav, .top-nav-container, [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
         gap: 8px !important;
@@ -810,6 +815,51 @@ CINEMATIC_THREEJS_TEMPLATE = """
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    #hologram-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      margin-top: 14px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #00f3ff;
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.25s ease;
+      user-select: none;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.12);
+    }
+    #hologram-toggle:hover {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: #00f3ff;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
+      transform: translateY(-1px);
+    }
+    #hologram-toggle.disabled {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.4);
+      box-shadow: none;
+    }
+    #hologram-toggle .toggle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00f3ff;
+      box-shadow: 0 0 8px #00f3ff;
+      transition: all 0.25s ease;
+      display: inline-block;
+    }
+    #hologram-toggle.disabled .toggle-dot {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+    }
+
     .telemetry-row {
       display: flex;
       justify-content: space-between;
@@ -1057,6 +1107,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       #telemetry-drawer .silhouette-canvas { height: 50px !important; width: 100% !important; }
       #telemetry-drawer .telemetry-label { font-size: 9.5px !important; letter-spacing: 0.3px !important; width: 100% !important; text-align: left !important; }
       #telemetry-drawer .telemetry-value { font-size: 11.5px !important; width: 100% !important; text-align: left !important; }
+      #telemetry-drawer #hologram-toggle { padding: 8px 12px !important; font-size: 10px !important; margin-top: 10px !important; }
 
       /* Data Readouts single column flex layout */
       .telemetry-row {
@@ -1179,6 +1230,10 @@ CINEMATIC_THREEJS_TEMPLATE = """
       <div class="scale-card-title">HUMAN-SCALE PHYSICAL COMPARISON</div>
       <div class="scale-analogy-text" id="drawer-scale">---</div>
       <div class="silhouette-canvas" id="drawer-silhouette"></div>
+      <div id="hologram-toggle" class="hologram-toggle-btn" onclick="toggleHologram()" title="Toggle 3D Holographic Landmark Scale in Scene">
+        <span class="toggle-dot"></span>
+        <span class="toggle-label">3D HOLO COMPARISON: ON</span>
+      </div>
     </div>
 
     <div class="telemetry-row">
@@ -1237,6 +1292,22 @@ CINEMATIC_THREEJS_TEMPLATE = """
       // Scene, camera, and renderer setup
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x000000);
+
+      // Procedural Holographic Scale Comparison Landmark System
+      const hologramGroup = new THREE.Group();
+      hologramGroup.name = "hologramGroup";
+      hologramGroup.visible = false;
+      scene.add(hologramGroup);
+
+      const hologramMaterial = new THREE.LineBasicMaterial({
+        color: 0x00f3ff,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      window.hologramMaterial = hologramMaterial;
+      let hologramEnabled = true;
 
       const width = window.innerWidth || 1200;
       const height = window.innerHeight || 800;
@@ -1746,7 +1817,8 @@ CINEMATIC_THREEJS_TEMPLATE = """
             inclination: inclination,
             group: astGroup,
             rock: rockMesh,
-            hitbox: hitboxMesh
+            hitbox: hitboxMesh,
+            geoSize: geoSize
           };
 
           astGroup.userData = telemetryData;
@@ -1761,6 +1833,342 @@ CINEMATIC_THREEJS_TEMPLATE = """
           interactiveObjects.push(hitboxMesh);
         });
       }
+
+      // Procedural Landmark Hologram Generator
+      function clearHologramGroup() {
+        while (hologramGroup.children.length > 0) {
+          const child = hologramGroup.children[0];
+          hologramGroup.remove(child);
+          if (child.isGroup) {
+            while (child.children.length > 0) {
+              const subChild = child.children[0];
+              child.remove(subChild);
+              if (subChild.geometry) subChild.geometry.dispose();
+              if (subChild.material) {
+                if (subChild.material.map) subChild.material.map.dispose();
+                if (subChild.material !== hologramMaterial) subChild.material.dispose();
+              }
+            }
+          } else {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+              if (child.material.map) child.material.map.dispose();
+              if (child.material !== hologramMaterial) child.material.dispose();
+            }
+          }
+        }
+      }
+
+      function createLandmarkHologram(asteroidDiameterMeters, geoSize) {
+        clearHologramGroup();
+        if (!hologramEnabled || !asteroidDiameterMeters) return;
+
+        const diam = Number(asteroidDiameterMeters) || 100;
+        let landmarkName = "";
+        let landmarkHeight = 0;
+        let landmarkWidth = 0;
+        let landmarkDim = "";
+        const pts = [];
+
+        function addSeg(x1, y1, z1, x2, y2, z2) {
+          pts.push(new THREE.Vector3(x1, y1, z1), new THREE.Vector3(x2, y2, z2));
+        }
+
+        if (diam < 100) {
+          // Passenger jet silhouette (length ~70m, wingspan ~65m)
+          landmarkName = "Passenger Jet (747)";
+          landmarkHeight = 70;
+          landmarkWidth = 65;
+          landmarkDim = "70m Length";
+
+          // Nose cone & Cockpit
+          addSeg(0, 70, 0, -3.2, 62, 0);
+          addSeg(0, 70, 0, 3.2, 62, 0);
+          addSeg(-3.2, 62, 0, 3.2, 62, 0);
+          addSeg(0, 70, 0, 0, 62, 3);
+          addSeg(-3.2, 62, 0, 0, 62, 3);
+          addSeg(3.2, 62, 0, 0, 62, 3);
+          addSeg(-2.8, 64, 1.5, 2.8, 64, 1.5);
+
+          // Fuselage tube
+          addSeg(-3.2, 62, 0, -3.2, 10, 0);
+          addSeg(3.2, 62, 0, 3.2, 10, 0);
+          addSeg(0, 62, 3, 0, 10, 3);
+          addSeg(-3.2, 45, 0, 3.2, 45, 0);
+          addSeg(-3.2, 28, 0, 3.2, 28, 0);
+
+          // Left Wing
+          addSeg(-3.2, 42, 0, -32.5, 22, 0);
+          addSeg(-32.5, 22, 0, -32.5, 27, 0);
+          addSeg(-32.5, 27, 0, -3.2, 50, 0);
+          addSeg(-32.5, 27, 0, -32.5, 32, 2.5); // Winglet
+          addSeg(-12, 30, -2, -12, 38, -2);     // Engine
+          addSeg(-10, 34, -2, -14, 34, -2);
+
+          // Right Wing
+          addSeg(3.2, 42, 0, 32.5, 22, 0);
+          addSeg(32.5, 22, 0, 32.5, 27, 0);
+          addSeg(32.5, 27, 0, 3.2, 50, 0);
+          addSeg(32.5, 27, 0, 32.5, 32, 2.5);  // Winglet
+          addSeg(12, 30, -2, 12, 38, -2);      // Engine
+          addSeg(10, 34, -2, 14, 34, -2);
+
+          // Horizontal Tail Stabilizers
+          addSeg(-3.2, 6, 0, -12.5, 2, 0);
+          addSeg(-12.5, 2, 0, -12.5, 5, 0);
+          addSeg(-12.5, 5, 0, -3.2, 10, 0);
+          addSeg(3.2, 6, 0, 12.5, 2, 0);
+          addSeg(12.5, 2, 0, 12.5, 5, 0);
+          addSeg(12.5, 5, 0, 3.2, 10, 0);
+
+          // Vertical Tail Fin & Closure
+          addSeg(0, 12, 0, 0, 2, 16);
+          addSeg(0, 2, 16, 0, 0, 14);
+          addSeg(0, 0, 14, 0, 0, 0);
+          addSeg(-3.2, 10, 0, 0, 0, 0);
+          addSeg(3.2, 10, 0, 0, 0, 0);
+
+        } else if (diam <= 450) {
+          // Eiffel Tower silhouette (height 330m, stepped tapered wireframe lines)
+          landmarkName = "Eiffel Tower";
+          landmarkHeight = 330;
+          landmarkWidth = 125;
+          landmarkDim = "330m Height";
+
+          // Base Pillars & Ground Ties
+          addSeg(-62.5, 0, 0, -38, 57, 0);
+          addSeg(62.5, 0, 0, 38, 57, 0);
+          addSeg(-38, 0, 0, -25, 57, 0);
+          addSeg(38, 0, 0, 25, 57, 0);
+          addSeg(-62.5, 0, 0, -38, 0, 0);
+          addSeg(38, 0, 0, 62.5, 0, 0);
+
+          // Base Arch
+          addSeg(-25, 0, 0, -18, 30, 0);
+          addSeg(-18, 30, 0, 0, 40, 0);
+          addSeg(0, 40, 0, 18, 30, 0);
+          addSeg(18, 30, 0, 25, 0, 0);
+
+          // Base Trusses
+          addSeg(-62.5, 0, 0, -25, 57, 0);
+          addSeg(-38, 0, 0, -38, 57, 0);
+          addSeg(62.5, 0, 0, 25, 57, 0);
+          addSeg(38, 0, 0, 38, 57, 0);
+
+          // Level 1 Platform (Y = 57 to 62)
+          addSeg(-42, 57, 0, 42, 57, 0);
+          addSeg(-40, 62, 0, 40, 62, 0);
+          addSeg(-42, 57, 0, -40, 62, 0);
+          addSeg(42, 57, 0, 40, 62, 0);
+
+          // Tier 2 (Y = 62 to 115)
+          addSeg(-35, 62, 0, -20, 115, 0);
+          addSeg(35, 62, 0, 20, 115, 0);
+          addSeg(-20, 62, 0, -12, 115, 0);
+          addSeg(20, 62, 0, 12, 115, 0);
+          addSeg(-35, 62, 0, -12, 115, 0);
+          addSeg(-20, 62, 0, -20, 115, 0);
+          addSeg(35, 62, 0, 12, 115, 0);
+          addSeg(20, 62, 0, 20, 115, 0);
+
+          // Level 2 Platform (Y = 115 to 120)
+          addSeg(-24, 115, 0, 24, 115, 0);
+          addSeg(-22, 120, 0, 22, 120, 0);
+          addSeg(-24, 115, 0, -22, 120, 0);
+          addSeg(24, 115, 0, 22, 120, 0);
+
+          // Tapered Shaft (Y = 120 to 276)
+          addSeg(-18, 120, 0, -4, 276, 0);
+          addSeg(18, 120, 0, 4, 276, 0);
+          addSeg(0, 120, 0, 0, 276, 0);
+
+          let prevY = 120, prevW = 18;
+          [160, 200, 240, 276].forEach(y => {
+            const w = 18 - (18 - 4) * ((y - 120) / (276 - 120));
+            addSeg(-w, y, 0, w, y, 0);
+            addSeg(-prevW, prevY, 0, w, y, 0);
+            addSeg(prevW, prevY, 0, -w, y, 0);
+            prevY = y;
+            prevW = w;
+          });
+
+          // Level 3 Platform & Dome (Y = 276 to 295)
+          addSeg(-7, 276, 0, 7, 276, 0);
+          addSeg(-4, 276, 0, -3, 295, 0);
+          addSeg(4, 276, 0, 3, 295, 0);
+          addSeg(-3, 295, 0, 3, 295, 0);
+
+          // Lantern & Spire (Y = 295 to 330)
+          addSeg(-2, 295, 0, -1.5, 305, 0);
+          addSeg(2, 295, 0, 1.5, 305, 0);
+          addSeg(-1.5, 305, 0, 1.5, 305, 0);
+          addSeg(0, 305, 0, 0, 330, 0);
+          addSeg(-3, 318, 0, 3, 318, 0);
+
+        } else {
+          // Skyscraper (Burj Khalifa silhouette, height 828m, stepped vertical setbacks)
+          landmarkName = "Burj Khalifa";
+          landmarkHeight = 828;
+          landmarkWidth = 140;
+          landmarkDim = "828m Height";
+
+          // Base Podium
+          addSeg(-70, 0, 0, 70, 0, 0);
+          addSeg(-70, 0, 0, -70, 80, 0);
+          addSeg(70, 0, 0, 70, 80, 0);
+          addSeg(-70, 40, 0, 70, 40, 0);
+
+          // Central Spine Line
+          addSeg(0, 0, 0, 0, 750, 0);
+
+          // Stepped Setbacks
+          const setbacks = [
+            { y0: 80, y1: 160, xL: -58, xR: 70, shelfL: -70, shelfR: 70 },
+            { y0: 160, y1: 240, xL: -58, xR: 50, shelfL: -58, shelfR: 70 },
+            { y0: 240, y1: 320, xL: -46, xR: 50, shelfL: -58, shelfR: 50 },
+            { y0: 320, y1: 400, xL: -46, xR: 38, shelfL: -46, shelfR: 50 },
+            { y0: 400, y1: 480, xL: -34, xR: 38, shelfL: -46, shelfR: 38 },
+            { y0: 480, y1: 560, xL: -34, xR: 26, shelfL: -34, shelfR: 38 },
+            { y0: 560, y1: 630, xL: -22, xR: 26, shelfL: -34, shelfR: 26 },
+            { y0: 630, y1: 700, xL: -12, xR: 12, shelfL: -22, shelfR: 26 },
+            { y0: 700, y1: 750, xL: -6, xR: 6, shelfL: -12, shelfR: 12 }
+          ];
+
+          setbacks.forEach(tier => {
+            if (tier.shelfL !== tier.xL) addSeg(tier.shelfL, tier.y0, 0, tier.xL, tier.y0, 0);
+            if (tier.shelfR !== tier.xR) addSeg(tier.xR, tier.y0, 0, tier.shelfR, tier.y0, 0);
+            addSeg(tier.xL, tier.y0, 0, tier.xL, tier.y1, 0);
+            addSeg(tier.xR, tier.y0, 0, tier.xR, tier.y1, 0);
+            const midY = (tier.y0 + tier.y1) * 0.5;
+            addSeg(tier.xL, midY, 0, tier.xR, midY, 0);
+            addSeg(tier.xL, tier.y1, 0, tier.xR, tier.y1, 0);
+          });
+
+          // Pinnacle Needle Spire (Y = 750 to 828)
+          addSeg(-6, 750, 0, 0, 828, 0);
+          addSeg(6, 750, 0, 0, 828, 0);
+          addSeg(0, 750, 0, 0, 828, 0);
+          addSeg(-4, 790, 0, 4, 790, 0);
+          addSeg(-2, 815, 0, 2, 815, 0);
+        }
+
+        // Measurement bracket line alongside the landmark
+        const xBrk = -(landmarkWidth * 0.5 + 18);
+        addSeg(xBrk, 0, 0, xBrk, landmarkHeight, 0);
+        addSeg(xBrk, landmarkHeight, 0, xBrk + 12, landmarkHeight, 0);
+        addSeg(xBrk, 0, 0, xBrk + 12, 0, 0);
+        addSeg(xBrk - 6, landmarkHeight * 0.5, 0, xBrk + 6, landmarkHeight * 0.5, 0);
+        // Ground baseline
+        addSeg(-(landmarkWidth * 0.5 + 24), 0, 0, (landmarkWidth * 0.5 + 16), 0, 0);
+
+        // Build THREE.LineSegments
+        const landmarkGeo = new THREE.BufferGeometry().setFromPoints(pts);
+        const landmarkLines = new THREE.LineSegments(landmarkGeo, hologramMaterial);
+
+        // Interactive scale comparison label sprite
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 320;
+        const ctx = canvas.getContext('2d');
+
+        // Cyber container background
+        ctx.fillStyle = 'rgba(6, 12, 24, 0.92)';
+        ctx.strokeStyle = '#00f3ff';
+        ctx.lineWidth = 4;
+        if (ctx.roundRect) {
+          ctx.beginPath();
+          ctx.roundRect(4, 4, 1016, 312, 16);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.fillRect(4, 4, 1016, 312);
+          ctx.strokeRect(4, 4, 1016, 312);
+        }
+
+        // Cyber corner accents
+        ctx.fillStyle = '#00f3ff';
+        ctx.fillRect(4, 4, 24, 6);
+        ctx.fillRect(4, 4, 6, 24);
+        ctx.fillRect(996, 4, 24, 6);
+        ctx.fillRect(1014, 4, 6, 24);
+        ctx.fillRect(4, 310, 24, 6);
+        ctx.fillRect(4, 292, 6, 24);
+        ctx.fillRect(996, 310, 24, 6);
+        ctx.fillRect(1014, 292, 6, 24);
+
+        // Header tag
+        ctx.font = 'bold 24px monospace';
+        ctx.fillStyle = '#00f3ff';
+        ctx.fillText("HOLOGRAPHIC SCALE COMPARISON", 36, 48);
+
+        // Landmark name
+        ctx.font = 'bold 44px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${landmarkName} (${landmarkDim})`, 36, 114);
+
+        // Comparison line
+        ctx.font = 'bold 36px monospace';
+        ctx.fillStyle = '#ffaa00';
+        ctx.fillText(`vs Asteroid (${Math.round(diam)}m)`, 36, 175);
+
+        // Ratio readout
+        const ratio = (diam / landmarkHeight).toFixed(2);
+        ctx.font = '28px monospace';
+        ctx.fillStyle = '#00f3ff';
+        ctx.fillText(`Asteroid is ${ratio}x Landmark size`, 36, 235);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearFilter;
+        const spriteMat = new THREE.SpriteMaterial({
+          map: tex,
+          transparent: true,
+          opacity: 0.95,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const labelSprite = new THREE.Sprite(spriteMat);
+
+        const labelH = Math.max(35, landmarkHeight * 0.22);
+        const labelW = labelH * (1024 / 320);
+        labelSprite.scale.set(labelW, labelH, 1.0);
+        labelSprite.position.set(xBrk - (labelW * 0.5) - 14, 0, 0);
+
+        // Assemble subGroup centered at origin
+        const subGroup = new THREE.Group();
+        landmarkLines.position.y = -landmarkHeight * 0.5;
+        labelSprite.position.y = 0;
+        subGroup.add(landmarkLines);
+        subGroup.add(labelSprite);
+
+        // Scale relative to asteroid visual radius:
+        // Visual diameter of asteroid is (geoSize * 2)
+        // Physical diameter of asteroid is diam meters
+        const gSize = geoSize || 1.2;
+        const scaleFactor = (gSize * 2.0) / Math.max(1, diam);
+        subGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+        hologramGroup.add(subGroup);
+        return hologramGroup;
+      }
+      window.createLandmarkHologram = createLandmarkHologram;
+
+      window.toggleHologram = function() {
+        hologramEnabled = !hologramEnabled;
+        const btn = document.getElementById('hologram-toggle');
+        const label = btn ? btn.querySelector('.toggle-label') : null;
+        if (hologramEnabled) {
+          if (btn) btn.classList.remove('disabled');
+          if (label) label.innerText = "3D HOLO COMPARISON: ON";
+          if (selectedMesh && isTracking && selectedMesh.userData && selectedMesh.userData.diameter) {
+            createLandmarkHologram(selectedMesh.userData.diameter, selectedMesh.userData.geoSize);
+            hologramGroup.visible = true;
+          }
+        } else {
+          if (btn) btn.classList.add('disabled');
+          if (label) label.innerText = "3D HOLO COMPARISON: OFF";
+          hologramGroup.visible = false;
+        }
+      };
 
       // Interaction and camera transitions
       const raycaster = new THREE.Raycaster();
@@ -1870,6 +2278,13 @@ CINEMATIC_THREEJS_TEMPLATE = """
         if (incEl) incEl.innerText = `${(data.inclination * (180/Math.PI)).toFixed(1)}°`;
 
         renderSilhouette(data.diameter, data.scaleAnalogy);
+        if (hologramEnabled && data && data.diameter) {
+          createLandmarkHologram(data.diameter, data.geoSize);
+          hologramGroup.visible = true;
+        } else {
+          hologramGroup.visible = false;
+        }
+
         drawer.classList.add('open');
         drawer.style.right = '0px';
 
@@ -1897,6 +2312,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
       function flyToStation(mesh) {
         selectedMesh = null;
         isTracking = false;
+        hologramGroup.visible = false;
         tooltip.style.display = 'none';
 
         const worldPos = new THREE.Vector3();
@@ -1951,6 +2367,7 @@ CINEMATIC_THREEJS_TEMPLATE = """
         stopAutoPilot();
         isTracking = false;
         selectedMesh = null;
+        hologramGroup.visible = false;
         drawer.classList.remove('open');
         drawer.style.right = '-100vw';
 
@@ -2142,6 +2559,19 @@ CINEMATIC_THREEJS_TEMPLATE = """
         // Target tracking and screen-space reticle projection
         if (isTracking && selectedMesh) {
           controls.target.copy(selectedMesh.position);
+
+          // Holographic Scale Landmark Tracking & Flicker Animation
+          if (hologramGroup && hologramGroup.visible) {
+            const rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
+            const gSize = (selectedMesh.userData && selectedMesh.userData.geoSize) ? selectedMesh.userData.geoSize : 1.5;
+            const offsetDist = gSize * 2.8 + 1.2;
+            hologramGroup.position.copy(selectedMesh.position).addScaledVector(rightVec, offsetDist);
+            hologramGroup.quaternion.copy(camera.quaternion);
+
+            if (window.hologramMaterial) {
+              window.hologramMaterial.opacity = 0.75 + 0.15 * Math.sin(Date.now() * 0.012);
+            }
+          }
 
           const reticle = document.getElementById('targeting-reticle');
           if (reticle && reticle.classList.contains('active')) {
