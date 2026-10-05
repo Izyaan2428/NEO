@@ -6,7 +6,6 @@ let camera = null;
 let renderer = null;
 let controls = null;
 let textureLoader = null;
-let defaultCamPos = null;
 
 const clock = new THREE.Clock();
 

@@ -78,6 +78,7 @@ def build_visualizer_html(
         {{"Name": "SIM-BETA", "Diameter (m)": 120, "Velocity (km/h)": 28000, "Miss Distance (km)": 14000000, "Hazardous": false, "Scale Analogy": "Football Stadium scale", "Lunar Distance (LD)": 36.4}}
       ];
     }}
+    window.__NEO_DATA__ = asteroidData;
     """
 
     js_bundle = _load_js_bundle()
